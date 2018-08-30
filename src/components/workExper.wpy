@@ -1,0 +1,378 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span">工作经验</text>
+      <!-- <text class="icon">问</text> -->
+    </view>
+    <view class="li device">
+      <text class="title">设备类型</text>
+      <text class="dian">:</text>
+      <view class="types">
+        <view class="grab">
+          <view wx:for="{{device.grab}}" @tap="selectFun('device','{{index}}')" class="em {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+            <text class="name">{{item.name}}</text>
+            <text class="span">{{item.amount}}</text>
+          </view>
+        </view>
+        <view class="other">
+          <view class="em {{device.others.type.select ? 'selected' : ''}}" @tap="deviceTypeSelect('type')">
+            <text class="name">{{device.others.type.name}}</text>
+          </view>
+          <view class="input {{device.others.input.select ? 'selected' : ''}}" @tap="deviceTypeSelect('input')">
+            <input placeholder="其他，点击输入" value="{{device.others.input.otherDeviceValue}}"/>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="li require" wx:for="{{list}}" wx:key="{{index}}" wx:for-item="itemLi" wx:for-index="indexItem">
+      <text class="title">{{itemLi.name}}</text>
+      <text class="dian">:</text>
+      <view class="types">
+        <repeat wx:for="{{itemLi.types}}" wx:key="{{index}}">
+            <block wx:if="{{item.value != ''}}">
+              <view @tap="selectFun('list','{{index}}','{{indexItem}}')" class="option {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+                  <text class="name">{{item.name}}</text>
+              </view>
+            </block>
+            <block wx:if="{{item.value == ''}}">
+              <view @tap="selectFun('list','{{index}}','{{indexItem}}')" class="option {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+                <picker mode="date" value="{{date}}" start="2015-09-01" end="2020-09-01" bindchange="bindDateChange">
+                  <text class="name">{{item.name}}</text>
+                </picker>
+              </view>
+            </block>
+        </repeat>
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy';
+export default class Index extends wepy.component {
+  props = {
+    item: {},
+    selectLoader: {
+      twoWay: true
+    }
+  };
+  data = {
+    device: {
+      grab: [
+        {
+          name: '小挖',
+          amount: '13吨以下',
+          value: 2,
+          type: 'driverType'
+        },
+        {
+          name: '中挖',
+          amount: '13-25吨',
+          value: 3,
+          type: 'driverType'
+        },
+        {
+          name: '大挖',
+          amount: '25吨以上',
+          value: 4,
+          type: 'driverType'
+        }
+      ],
+      others: {
+        type: {
+          name: '装载机',
+          select: true,
+          value: 5,
+          type: 'driverType'
+        },
+        input: {
+          otherDeviceValue: '',
+          value: 99,
+          select: false,
+          type: 'otherDevice'
+        }
+      }
+    },
+    // 其他
+    list: [
+      {
+        name: '破碎锤',
+        types: [
+          {
+            name: '不限',
+            select: false,
+            value: 1,
+            type: 'useHammerFlag'
+          },
+          {
+            name: '会使用',
+            value: 2,
+            type: 'useHammerFlag'
+          }
+        ]
+      },
+      {
+        name: '驾龄要求',
+        types: [
+          {
+            name: '不限',
+            value: 1,
+            type: 'drivingYears'
+          },
+          {
+            name: '1年以上',
+            select: false,
+            value: 2,
+            type: 'drivingYears'
+          },
+          {
+            name: '3年以上',
+            value: 3,
+            type: 'drivingYears'
+          },
+          {
+            name: '5年以上',
+            value: 4,
+            type: 'drivingYears'
+          }
+        ]
+      },
+      {
+        name: '招聘实效',
+        types: [
+          {
+            name: '长期有效',
+            select: false,
+            value: 1,
+            type: 'longTime'
+          },
+          {
+            name: '选择日期',
+            value: '',
+            type: 'cutoffTime'
+          }
+        ]
+      }
+    ]
+  };
+  onLoad() {}
+  watch = {
+    selectLoader(newVal, oldVal) {}
+  };
+  methods = {
+    bindDateChange: function(e) {
+      this.list[2].types[1].name = e.detail.value;
+      this.$apply();
+    },
+    // 点击选中
+    selectFun(type, index, indexItem) {
+      let typeArr;
+      if (type === 'device') {
+        // 设备
+        typeArr = this.device.grab;
+        this.device.others.type.select = false;
+        this.device.others.input.select = false;
+      } else {
+        typeArr = this.list[indexItem].types;
+      }
+
+      typeArr.forEach((element, i) => {
+        element.select = false;
+        if (i === index) {
+          element.select = true;
+        }
+      });
+      this.$emit('editorData', typeArr[index].type, typeArr[index].value);
+    },
+    // 设备选择
+    deviceTypeSelect(type) {
+      this.device.others.type.select = false;
+      this.device.others.input.select = false;
+      this.device.grab.forEach((element, i) => {
+        element.select = false;
+      });
+      this.device.others[type].select = true;
+    },
+    gotoLink() {
+      wepy.navigateTo({
+        url: `/pages/chooseCity`
+      });
+    }
+  };
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  .li {
+    &.change-li {
+      border-bottom: 1rpx solid rgba(220, 226, 238, 0.6);
+      padding: 26rpx 0;
+      margin-bottom: 50rpx;
+      .title {
+        line-height: 40rpx;
+        &:before {
+          line-height: 40rpx;
+        }
+      }
+      .citys {
+        display: flex;
+        justify-content: space-between;
+        flex-grow: 1;
+        align-items: center;
+        text {
+          font-size: 32rpx;
+          color: #4a4a53;
+          line-height: 40rpx;
+        }
+        .right {
+          display: block;
+          transform: rotate(45deg);
+          border-top: 3rpx solid #bdc1c9;
+          border-right: 3rpx solid #bdc1c9;
+          width: 14rpx;
+          height: 14rpx;
+        }
+      }
+    }
+    &.device {
+      padding-bottom: 20rpx;
+      .title,
+      .dian {
+        height: 68rpx;
+        line-height: 68rpx;
+      }
+      .types {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        .grab {
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          margin-bottom: 20rpx;
+          .em {
+            flex: 1;
+            margin-right: 12rpx;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            &:last-child {
+              margin: 0;
+            }
+            &.selected {
+              background: rgba(59, 106, 251, 0.08);
+              border-color: rgba(59, 106, 251, 0.7);
+              text {
+                color: #3b6afb;
+                font-weight: bold;
+              }
+            }
+            text {
+              display: block;
+            }
+            .name {
+              font-size: 24rpx;
+              line-height: 32rpx;
+              color: #4a4a53;
+            }
+            .span {
+              font-size: 20rpx;
+              color: #9ea4af;
+            }
+          }
+        }
+        .other {
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          .em {
+            margin-right: 12rpx;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            width: calc(~'33% - 12rpx');
+            justify-content: center;
+            flex-shrink: 0;
+            .name {
+              font-size: 24rpx;
+              color: #4a4a53;
+            }
+            &.selected {
+              background: rgba(59, 106, 251, 0.08);
+              border-color: rgba(59, 106, 251, 0.7);
+              text {
+                color: #3b6afb;
+                font-weight: bold;
+              }
+            }
+          }
+          .input {
+            flex-grow: 1;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            justify-content: center;
+            input {
+              color: #6a6a77;
+              font-size: 24rpx;
+              text-align: center;
+            }
+          }
+        }
+      }
+    }
+    &.require {
+      padding: 20rpx 0;
+      .title,
+      .dian {
+        height: 68rpx;
+        line-height: 68rpx;
+      }
+      .types {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-grow: 1;
+        .option {
+          flex: 1;
+          margin-right: 12rpx;
+          border: 1rpx solid rgba(189, 193, 201, 0.7);
+          border-radius: 4rpx;
+          height: 68rpx;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          justify-content: center;
+          &.selected {
+            background: rgba(59, 106, 251, 0.08);
+            border-color: rgba(59, 106, 251, 0.7);
+            text {
+              color: #3b6afb;
+              font-weight: bold;
+            }
+          }
+          &:last-child {
+            margin: 0;
+          }
+          .name {
+            font-size: 24rpx;
+            color: #4a4a53;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

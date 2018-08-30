@@ -1,0 +1,188 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span">薪资福利</text>
+    </view>
+    <view class="li">
+      <text class="title">薪资福利</text>
+      <text class="dian">:</text>
+      <view class="types">
+        <view class="option" wx:for="{{welfare}}" wx:key="{{index}}">
+          <view class="left">
+            <text class="icon">{{item.select ? '对' : '圈'}}</text>
+            <text class="text">{{item.name}}</text>
+          </view>
+          <view class="input" wx:if="{{item.input}}">
+            <input value="{{item.value}}"/>
+            <text class="price">元／天</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="li no-fill">
+      <text class="title">更多福利：</text>
+      <view class="types">
+        <view wx:for="{{more}}" class="em {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+          <text class="name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy';
+export default class Index extends wepy.component {
+  props = {
+    item: {}
+  };
+  data = {
+    welfare: [
+      {
+        name: '按天结',
+        value: '',
+        select: true,
+        input: true
+      },
+      {
+        name: '按月结',
+        value: '',
+        select: false,
+        input: true
+      },
+      {
+        name: '薪资面议',
+        select: false,
+        input: false
+      }
+    ],
+    more: [
+      {
+        name: '包吃',
+        select: false
+      },
+      {
+        name: '包住',
+        select: false
+      },
+      {
+        name: '话费补助',
+        select: false
+      },
+      {
+        name: '加班费',
+        select: true
+      },
+      {
+        name: '上保险',
+        select: false
+      },
+      {
+        name: '报销路费',
+        select: false
+      }
+    ]
+  };
+  onLoad() {}
+
+  methods = {};
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  .li {
+    .types {
+      display: flex;
+      flex-direction: column;
+      .option {
+        padding: 10rpx 0;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        .left {
+          width: 210rpx;
+          display: flex;
+          flex-direction: row;
+          .icon {
+            width: 32rpx;
+            height: 32rpx;
+            margin-right: 20rpx;
+            font-family: 'TieJia';
+            color: #3b6afb;
+            font-size: 32rpx;
+            line-height: 32rpx;
+            text-align: center;
+          }
+          .text {
+            font-size: 28rpx;
+            color: #4a4a53;
+          }
+        }
+        .input {
+          display: flex;
+          flex-direction: row;
+          font-size: 24rpx;
+          align-items: center;
+          color: #9ea4af;
+          input {
+            width: 240rpx;
+            height: 60rpx;
+            line-height: 60rpx;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            font-size: 28rpx;
+            color: #4a4a53;
+            margin-right: 12rpx;
+            font-weight: bold;
+            text-align: center;
+          }
+        }
+      }
+    }
+    &.no-fill {
+      padding-top: 20rpx;
+      padding-bottom: 10rpx;
+      .title:before {
+        display: none;
+      }
+      .types {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        flex-grow: 1;
+        .em {
+          margin-right: 12rpx;
+          margin-bottom: 20rpx;
+          border: 1rpx solid rgba(189, 193, 201, 0.7);
+          border-radius: 4rpx;
+          height: 68rpx;
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          width: calc(~'33% - 12rpx');
+          justify-content: center;
+          .name {
+            font-size: 24rpx;
+            color: #4a4a53;
+          }
+          &:nth-of-type(3n) {
+            margin-right: 0;
+          }
+          &.selected {
+            background: rgba(59, 106, 251, 0.08);
+            border-color: rgba(59, 106, 251, 0.7);
+            text {
+              color: #3b6afb;
+              font-weight: bold;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>

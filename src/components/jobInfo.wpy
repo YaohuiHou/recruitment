@@ -1,0 +1,263 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span">招聘方信息</text>
+    </view>
+    <view class="li info" wx:for="{{info}}" wx:key="{{index}}">
+      <text class="title">{{item.name}}</text>
+      <text class="dian">:</text>
+      <view class="input">
+        <input
+          placeholder="点击输入"
+          bindblur="inputFun"
+          data-type="{{item.type}}"
+          maxlength="11"
+          type="{{item.type === 'tel' ? 'number':'text'}}"
+          value="{{item.value}}"
+        />
+      </view>
+    </view>
+    <!-- 验证码 -->
+    <view class="li change-li" wx:if="{{VerifyCode}}">
+      <text class="title">验证码</text>
+      <text class="dian">:</text>
+      <view class="verifyContent">
+        <input class="verify" type="number" maxlength="4" value="{{verificationCode}}" placeholder="输入验证码" data-type="verificationCode"  bindblur="inputFun" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;"/>
+        <block wx:if="{{can}}">
+          <view class="btn" @tap="getVerifyCode"><text>{{verificationInfo}}</text></view>
+        </block>
+        <block wx:if="{{!can}}">
+          <view class="btn active"><text>{{verificationInfo}}</text></view>
+        </block>
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy'
+import { connect } from 'wepy-redux'
+import request from '../common/request.js'
+
+@connect({
+  state(state) {
+    return state
+  }
+})
+export default class Index extends wepy.component {
+  props = {
+    loaderTitle: {},
+    editorDataObject: {
+      twoWay: true
+    },
+    submitData: {
+      twoWay: true
+    }
+  }
+  data = {
+    info: [
+      {
+        name: '联系人',
+        value: '',
+        type: 'name'
+      },
+      {
+        name: '联系电话',
+        value: '',
+        type: 'tel'
+      }
+    ],
+    time: 60,
+    timer: null,
+    can: true,
+    Seconds: '',
+    verificationInfo: '点击获取验证码',
+    verificationCode: '',
+    VerifyCode: false
+  }
+
+  watch = {
+    editorDataObject() {
+      // 名字
+      this.info[0].value = this.editorDataObject.name
+      this.info.forEach(element => {
+        this.submitData[element.type] = element.value
+      })
+      this.$apply()
+    },
+    // 倒计时
+    Seconds() {
+      if (this.time <= 0) {
+        this.verificationInfo = '点击重新发送验证码'
+        this.can = true
+        this.time = 60
+        this.$apply()
+        return
+      } else {
+        this.verificationInfo = '重新发送 ' + '( ' + this.time + 's' + ' )'
+        this.can = false
+        this.time--
+      }
+      let timer = setTimeout(() => {
+        this.getNowFormatDate()
+        clearTimeout(timer)
+      }, 1000)
+      this.$apply()
+    }
+  }
+  onLoad() {
+    if (this.state.login.login) {
+      this.info[1].value = this.state.login.userInfo.mobile
+    }
+    this.$apply()
+  }
+
+  methods = {
+    // 失去焦点保存
+    inputFun(e) {
+      let val = e.detail.value
+      let type = e.target.dataset.type
+
+      switch (type) {
+        // 验证手机号
+        case 'tel':
+          if (
+            /^1(([38]\d)|(4[57])|(5[012356789])|(6[6])|(7[0678])|(9[89]))\d{8}$/.test(
+              val
+            )
+          ) {
+            // 更换手机号发送验证码
+            if (val != this.state.login.userInfo.mobile) {
+              this.VerifyCode = true
+            } else {
+              this.VerifyCode = false
+            }
+            // 保存手机号
+            this.$emit('editorData', 'tel', val)
+          } else {
+            wx.showToast({
+              title: '请输入正确的手机号',
+              icon: 'none',
+              duration: 1200
+            })
+            this.$emit('editorData', 'tel', '')
+            return
+          }
+          break
+
+        case 'name':
+          if (val.length <= 0) {
+            wx.showToast({
+              title: '请输入联系人姓名',
+              icon: 'none',
+              duration: 1200
+            })
+          }
+          break
+        case 'verificationCode':
+          if (val.length <= 0) {
+            wx.showToast({
+              title: '验证码不能为空',
+              icon: 'none',
+              duration: 1200
+            })
+          } else {
+            // 验证码验证
+          }
+          break
+      }
+      this.$emit('editorData', e.target.dataset.type, val)
+    },
+    // 手机验证码
+    getVerifyCode() {
+      this.getNowFormatDate()
+      this.verificationCodeFun()
+    }
+  }
+
+  // 实时定时器
+  getNowFormatDate() {
+    var date = new Date()
+    let Hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+    let Minutes =
+      date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+    let Seconds =
+      date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()
+    this.Seconds = Seconds
+    this.$apply()
+  }
+
+  // 验证码
+  verificationCodeFun() {
+    request
+      .cehomeRequest(
+        request.Api.getPhoneCode(),
+        { phoneNumber: this.info[1].value },
+        'POST',
+        this
+      )
+      .then(res => {
+        if (res.data.ret === '0') {
+          wx.showToast({
+            title: '验证码发送成功，注意查收',
+            icon: 'none',
+            duration: 1200
+          })
+          return
+        }
+        wx.showToast({
+          title: res.data.msg,
+          icon: 'none',
+          duration: 1200
+        })
+      })
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  margin-bottom: 30rpx;
+  .li {
+    height: 102rpx;
+    align-items: center;
+    border-bottom: 1rpx solid rgba(220, 226, 238, 0.6);
+    .input {
+      flex-grow: 1;
+      input {
+        font-size: 28rpx;
+      }
+    }
+    .verifyContent {
+      display: flex;
+      flex-direction: row;
+      .verify {
+        flex: 1;
+        font-size: 32rpx;
+        line-height: 40rpx;
+      }
+      .btn {
+        &.active {
+          text {
+            color: #9ea4af;
+          }
+        }
+        text {
+          position: relative;
+          font-size: 28rpx;
+          color: #3b6afb;
+          letter-spacing: 0.25rpx;
+          text-align: center;
+          &::before {
+            content: '\e63a';
+            font-family: 'TieJia';
+            color: #dce2ee;
+            font-size: 28rpx;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

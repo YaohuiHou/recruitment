@@ -1,0 +1,309 @@
+<template>
+  <view class="contariner">
+    <scroll-view class="content" scroll-y="{{scrollNeed}}" enable-back-to-top="true">
+      <view class="currentLocation" wx:if="{{allCity.province}}">
+          <text class="title">定位到位置</text>
+          <view class="city"><text class="location">{{allCity.province}} {{allCity.city}} {{allCity.district}}</text></view>
+      </view>
+      <view class="province">
+        <block wx:for="{{cityList}}" wx:key="{{index}}">
+            <text @tap="choose('{{item}}','{{index}}')">{{item.name}}</text>
+        </block>
+      </view>
+    </scroll-view>
+    <sidebar
+      :sidebarInfo.sync="sidebarInfo"
+      :cityData.sync="cityData"
+      :allCity.sync="allCity"
+      :page.sync="page"
+    ></sidebar>
+
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import API from '../common/api.js'
+import request from '../common/request.js'
+import mixins from '../mixins'
+import sidebar from '../components/sidebar'
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '选择城市'
+  }
+  components = {
+    sidebar
+  }
+
+  mixins = [mixins]
+
+  data = {
+    scrollNeed: true,
+    page: '',
+    // 二级城市
+    cityData: null,
+    cityIndex: null,
+    sidebarInfo: {
+      show: false
+    },
+    allCity: {
+      code: '',
+      province: '',
+      city: '',
+      district: ''
+    },
+    // 城市列表
+    cityList: []
+  }
+  watch = {
+    cityList() {
+      if (this.cityData) {
+        this.cityData = this.cityList[this.cityIndex]
+        this.$apply()
+      }
+    }
+  }
+  methods = {
+    choose(item, index) {
+      if (this.page == 'index') {
+        // 直辖市
+        switch (String(item.code)) {
+          case '110000':
+          case '120000':
+          case '310000':
+          case '500000':
+            this.allCity.province = item.name
+            this.allCity.city = ''
+            this.allCity.code = item.code
+            this.$apply()
+            wx.setStorage({
+              key: 'IndexChooseCity',
+              data: JSON.stringify(this.allCity)
+            })
+            // 返回
+            wx.navigateBack({
+              delta: 1
+            })
+            return
+            break
+        }
+      }
+
+      this.sidebarInfo.show = true
+      if (item.children.length <= 0) {
+        wx.showLoading()
+        // 获取市级数据
+        request
+          .cehomeRequest(
+            request.Api.getCityList(),
+            {
+              provinceCode: item.code
+            },
+            'GET'
+          )
+          .then(res => {
+            if (res.data.ret === '0') {
+              item.children = res.data.data
+              this.cityData = item
+              wx.hideLoading()
+              this.$apply()
+            }
+          })
+      } else {
+        this.cityData = item
+      }
+      this.cityIndex = index
+      this.scrollNeed = false
+      this.$apply()
+    }
+  }
+
+  events = {
+    hide: res => {
+      this.sidebarInfo.show = false
+      this.scrollNeed = true
+      // this.scrollNeed = true
+      this.$apply()
+    }
+  }
+
+  onLoad(options) {
+    this.page = options.page
+    wx.showLoading()
+    // allProvinceList
+    wx.getStorage({
+      key: 'allProvinceList1',
+      complete: res => {
+        if (!res.data) {
+          // 获取城市
+          this.getCityList()
+        } else {
+          let data = JSON.parse(res.data)
+          this.cityList = data
+          this.$apply()
+          wx.hideLoading()
+        }
+      }
+    })
+
+    // 城市
+    if (this.page == 'index') {
+      // 首页
+      wx.getStorage({
+        key: 'IndexChooseCity',
+        complete: async res => {
+          if (res.data) {
+            let data = JSON.parse(res.data)
+            this.allCity = data
+            this.$apply()
+          }
+        }
+      })
+    } else {
+      // 发布
+      wx.getStorage({
+        key: 'JOBchooseCity',
+        complete: async res => {
+          if (res.data) {
+            let data = JSON.parse(res.data)
+            this.allCity = data
+            this.$apply()
+          }
+        }
+      })
+    }
+
+    this.$apply()
+  }
+  onShow() {}
+
+  // 判断页面
+  indexORother(city) {
+    if (this.page == 'index') {
+      wx.setStorage({
+        key: 'IndexChooseCity',
+        data: city,
+        success: res => {
+          // 返回
+          wx.navigateBack({
+            delta: 1
+          })
+        }
+      })
+    } else {
+      wx.setStorage({
+        key: 'JOBchooseCity',
+        data: city,
+        success: res => {
+          // 返回
+          wx.navigateBack({
+            delta: 1
+          })
+        }
+      })
+    }
+  }
+  // 获取城市
+  getCityList() {
+    request
+      .cehomeRequest(request.Api.getProvinceList(), {}, 'GET')
+      .then(res => {
+        wx.hideLoading()
+        if (res.data.ret === '0') {
+          console.log(res.data.data)
+
+          this.cityList = res.data.data
+          this.$apply()
+          wx.setStorage({
+            key: 'allProvinceList1',
+            data: JSON.stringify(this.cityList)
+          })
+        }
+      })
+      .catch(err => {
+        if (err.errMsg == 'request:fail timeout') {
+          this.$parent.methods.showToast('网络请求超时~')
+        } else {
+          this.$parent.methods.showToast('网络好像有问题，请检查网络~')
+        }
+      })
+  }
+}
+</script>
+
+<style lang="less" scoped>
+@padding-30: 30rpx;
+.contariner {
+  background-color: #f9f9f9;
+  overflow: hidden;
+  height: 100vh;
+  .content {
+    height: 100vh;
+    position: relative;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    .province {
+      margin-top: 20rpx;
+      padding-left: @padding-30;
+      background-color: #ffffff;
+      text {
+        display: inline-block;
+        width: 100%;
+        text-align: left;
+        padding: @padding-30 0;
+        font-size: 28rpx;
+        color: #4a4a53;
+        letter-spacing: 0;
+        border-bottom: 1rpx solid rgba(220, 226, 238, 0.6);
+      }
+    }
+    .currentLocation {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      .title {
+        display: inline-block;
+        padding: 13rpx @padding-30;
+        font-size: 30rpx;
+        color: #9ea4af;
+        letter-spacing: 0.32rpx;
+      }
+      .city {
+        padding: 20rpx 0;
+        background-color: #ffffff;
+        .location {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          font-size: 28rpx;
+          color: #4a4a53;
+          letter-spacing: 0.35rpx;
+          padding-left: 30rpx;
+          &::before {
+            content: '\5b9a';
+            display: block;
+            padding-right: 13rpx;
+            font-family: 'TieJia';
+            font-size: 24rpx;
+            vertical-align: middle;
+            color: #999;
+          }
+        }
+        .hotCity {
+          display: inline-block;
+          padding: 4rpx 22rpx;
+          margin: 10rpx 30rpx;
+          box-sizing: border-box;
+          min-width: 172rpx;
+          text-align: center;
+          font-size: 28rpx;
+          color: #4a4a53;
+          letter-spacing: 0.3rpx;
+          background: #f5f8fa;
+          border-radius: 4rpx;
+        }
+      }
+    }
+  }
+}
+</style>

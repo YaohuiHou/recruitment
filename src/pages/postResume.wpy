@@ -1,0 +1,574 @@
+<template>
+  <view class="job">
+    <!-- 个人基本信息 -->
+    <personalInfo
+      :chooseCity.sync="chooseCity"
+      :editorDataObject.sync="editorDataObject"
+      :submitFunDisabled.sync="submitFunDisabled"
+    ></personalInfo>
+    <!-- 工作经验 -->
+    <jobDemand
+      :loaderTitle="loaderTitle"
+      :editorDataObject.sync="editorDataObject"
+    ></jobDemand>
+    <!-- 加分技能 -->
+    <additionTerm :editorDataObject.sync="editorDataObject"></additionTerm>
+    <!-- 薪资福利 -->
+    <welfare
+      :pageType.sync="pageType"
+      :editorDataObject.sync="editorDataObject"
+    ></welfare>
+    <!-- 更多信息 -->
+    <view class="item">
+      <view class="header">
+        <text class="span">更多信息<text class="hint">可选填，但可增加职位准确度，获取更多关注</text></text>
+      </view>
+    </view>
+    <moreInfo
+      hidden="{{showInfo}}"
+      :pageType.sync="pageType"
+      :worksRelation.sync="worksRelation"
+      :editorDataObject.sync="editorDataObject"
+      :submitData.sync="submitData"
+      :submitFunDisabled.sync="submitFunDisabled"
+    ></moreInfo>
+    <view class="more-button {{showInfo ? '' : 'show'}}" @tap="showMoreInfo">
+      <text>{{buttonHint}}</text>
+    </view>
+    <jobWanted :editorDataObject.sync="editorDataObject" :statusType.sync="statusType"></jobWanted>
+    <view class="submit" @tap="submitFun">确认发布</view>
+    <text class="hint-title">发布成功后您可以到【我的-我的发布】中查看发布的简历</text>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import request from '../common/request.js'
+import personalInfo from '../components/personalInfo'
+import jobDemand from '../components/job-demand'
+import additionTerm from '../components/additionTerm'
+import moreInfo from '../components/moreInfo'
+import welfare from '../components/welfare'
+import jobWanted from '../components/jobWanted'
+import { connect } from 'wepy-redux'
+
+@connect({
+  state(state) {
+    return state
+  }
+})
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '发布简历'
+  }
+  components = {
+    personalInfo,
+    jobDemand,
+    additionTerm,
+    moreInfo,
+    welfare,
+    jobWanted
+  }
+  data = {
+    submitFunDisabled: false,
+    EditOrPost: false,
+    // 验证码
+    VerifyCode: false,
+    pageCanEditor: '',
+    editorDataObject: {},
+    pageType: 'resume',
+    buttonHint: '填写更多信息',
+    showInfo: true,
+    loaderTitle: true,
+    // 选中城市
+    chooseCity: {
+      name: '选择您希望的工作地区',
+      code: 0
+    },
+    // 工程类型展示
+    worksRelation: '点击选择',
+    // 提交数据
+    submitData: {
+      area: '', // 地区名称
+      areaCode: '',
+      askFor: '', // 其他要求
+      driverType: '', // 设备类型
+      drivingYears: '', // 驾龄要求
+      headPortrait: '', // 头像
+      jobRequire: '', // 经验要求
+      repairFlag: '', //	维修保养  1 懂维修 2不太懂
+      trailerFlag: '', //	拖车	1会驾驶 2不会驾驶
+      useHammerFlag: '', //	使用破碎锤	number	【二期新增】1会使用 2不会
+      workRegion: '1', // 工作区域	number	【二期新增】 1只在本省 2可去外省
+      name: '', //	联系人	string
+      operationDirection: '1', //	操作方向	number	操作方向 1-不限 2-正手 3-反手
+      otherDevice: '', //	其它设备	string
+      otherWorks: '', //	其它工程	string
+      settlementAmount: '', //	结算金额	number
+      settlementType: '', //	结算类型	number	薪资福利 1-按天结 2-按月结 3-薪资面议
+      status: 1, //状态设置	number	状态 1-招聘中 2-已找到合适司机 3-关闭招聘
+      tel: '', //联系电话	string
+      userId: '', //	用户ID	number
+      videoPaths: '', // 视频地址
+      videoThumbPaths: '', // 视频图地址
+      workExperience: '', // 工作经验
+      askFor: '', // 其他要求
+      // verificationCode: '', //	验证码	string
+      // version: '3300', //	版本号	number	【二期新增】 3300前为老版本
+      worksRelation: '1' //	工程类型	string	多选，逗号分隔
+    },
+    // 必填项
+    mandatory: {
+      name: {
+        hint: '请输入联系人姓名'
+      },
+      tel: {
+        hint: '请输入正确的联系方式'
+      },
+      area: {
+        hint: '请输入工作地点'
+      }, // 地区名称
+      areaCode: {
+        hint: '请输入工作地点'
+      },
+      driverType: {
+        // 设备类型
+        other: {
+          type: 'otherDevice',
+          value: 99
+        },
+        hint: '您的设备类型还为空',
+        associated: {
+          // 关联破碎锤
+          type: 'useHammerFlag',
+          value: 5,
+          hint: '请选择破碎锤使用情况'
+        }
+      },
+      drivingYears: {
+        hint: '请选择驾龄要求'
+      }, // 驾龄要求
+      // 薪资
+      settlementType: {
+        removeOther: {
+          type: 'settlementAmount',
+          value: 3
+        },
+        hint: '请选择薪资待遇'
+      }
+    },
+    // 简历状态
+    statusType: {
+      title: '求职状态',
+      // 其他
+      types: [
+        {
+          name: '正在找工作',
+          select: true,
+          type: 'status',
+          value: 1
+        },
+        {
+          name: '考虑换工作',
+          type: 'status',
+          select: false,
+          value: 4
+        },
+        {
+          name: '关闭简历',
+          type: 'status',
+          select: false,
+          value: 3
+        }
+      ]
+    }
+  }
+  watch = {}
+  methods = {
+    showMoreInfo() {
+      switch (this.showInfo) {
+        case true:
+          this.buttonHint = '放弃填写更多信息'
+          this.showInfo = false
+          break
+        default:
+          this.buttonHint = '填写更多信息'
+          this.showInfo = true
+          break
+      }
+      this.$apply()
+    },
+    // 发布职位
+    submitFun() {
+      // 判断必填
+      for (const key in this.mandatory) {
+        let me = this.mandatory[key]
+
+        // 其他类型
+        if (me.other) {
+          if (this.submitData[key] === me.other.value) {
+            // 选择其他项
+            if (this.submitData[me.other.type] === '') {
+              this.toastView(me.hint)
+              return
+            }
+          }
+        }
+
+        // 除此之外其他项
+        if (me.removeOther) {
+          if (this.submitData[key] != me.removeOther.value) {
+            // 选择其他项
+            if (this.submitData[me.removeOther.type] === '') {
+              this.toastView(me.hint)
+              return
+            }
+          }
+        }
+
+        // 关联类型
+        if (me.associated) {
+          if (this.submitData[key] < me.associated.value) {
+            if (this.submitData[me.associated.type] === '') {
+              this.toastView(me.associated.hint)
+              return
+            }
+          }
+        }
+
+        if (me.orType) {
+          if (
+            this.submitData[key] === '' &&
+            this.submitData[me.orType] === ''
+          ) {
+            this.toastView(me.hint)
+            return
+          }
+        } else if (this.submitData[key] === '') {
+          this.toastView(me.hint)
+          return
+        }
+      }
+
+      this.submitData.userId = this.state.login.userInfo.uid
+
+      // 提交
+      if (this.submitFunDisabled) return
+      this.submitFunDisabled = true
+      request
+        .cehomeRequest(
+          this.EditOrPost ? request.Api.editResume() : request.Api.addResume(),
+          this.submitData,
+          'POST'
+        )
+        .then(res => {
+          if (res.data.ret === '0') {
+            this.toastView('发布成功')
+            let timer = setTimeout(() => {
+              clearTimeout(timer)
+              this.submitFunDisabled = false
+              wx.redirectTo({
+                url: '/pages/my-release?id=1&currentIndex=1'
+              })
+            }, 1200)
+          } else {
+            this.toastView(res.data.msg)
+            this.submitFunDisabled = false
+          }
+        })
+        .catch(err => {
+          this.submitFunDisabled = false
+          if (err.errMsg == 'request:fail timeout') {
+            wx.showToast({
+              title: '网络请求超时~',
+              icon: 'none',
+              duration: 2000
+            })
+          } else {
+            wx.showToast({
+              title: '网络好像有问题，请检查网络~',
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        })
+    }
+  }
+  onShow() {
+    // 城市
+    wx.getStorage({
+      key: 'JOBchooseCity',
+      complete: async res => {
+        if (res.data) {
+          let data = JSON.parse(res.data)
+          this.chooseCity.name = `${data.province} ${data.city} ${
+            data.district
+          }`
+          this.chooseCity.code = data.code
+          this.submitData.area = this.chooseCity.name
+          this.submitData.areaCode = this.chooseCity.code
+          this.$apply()
+        }
+      }
+    })
+
+    // 工程类型
+    wx.getStorage({
+      key: 'worksRelation',
+      success: res => {
+        if (res.data) {
+          let data = JSON.parse(res.data)
+          let keyArr = []
+          let valArr = []
+          data.forEach(element => {
+            keyArr.push(element.key)
+            valArr.push(element.value)
+          })
+          this.submitData.worksRelation = keyArr.join(',')
+          this.worksRelation = valArr.join(',')
+
+          this.$apply()
+        }
+      }
+    })
+  }
+  events = {
+    // 编辑提交数据
+    editorData(type, value) {
+      // 判断破碎锤使用
+      if (type == 'useHammerFlag') {
+        this.submitData[type] = value == 1 ? '2' : '1'
+      } else {
+        this.submitData[type] = value
+      }
+      this.$apply()
+    }
+  }
+
+  onLoad(option) {
+    // 清除
+    wx.removeStorage({ key: 'JOBchooseCity' })
+    wx.removeStorage({ key: 'worksRelation' })
+
+    if (this.state.login.userInfo) {
+      this.submitData.tel = this.state.login.userInfo.mobile
+    }
+    this.$parent.sensorsPublic.autoTrackPageShow('发布简历页')
+
+    // 编辑 | 发布
+    if (option.type == 'editor') {
+      wx.showLoading()
+      wx.getStorage({
+        key: 'myResumeEditorData',
+        complete: res => {
+          if (!res.data) {
+            // 重新获取
+            this.getEditorData(this.state.login.userInfo.uid)
+          } else {
+            let data = JSON.parse(res.data)
+            this.editorDataObject = data
+            this.editorDataFun()
+            // this.getEditorData(data.userId)
+            this.$apply()
+            wx.hideLoading()
+          }
+        }
+      })
+    } else {
+      this.mandatory.verificationCode = {
+        hint: '请输入正确的验证码'
+      }
+    }
+  }
+
+  // 获取发布详情
+  getEditorData(id) {
+    // 获取简历 4633  4636
+    request
+      .cehomeRequest(request.Api.myResumeList(), { userId: id }, 'POST')
+      .then(res => {
+        wx.hideLoading()
+        if (res.data.ret == '0') {
+          this.editorDataObject = res.data.data
+          this.$apply()
+
+          this.editorDataFun()
+        }
+      })
+  }
+
+  // 编辑赋值转化
+  editorDataFun() {
+    // 提交信息
+    for (const key in this.submitData) {
+      if (this.editorDataObject[key]) {
+        this.submitData[key] = this.editorDataObject[key]
+      }
+    }
+    // 城市
+    this.chooseCity.name = this.editorDataObject.area
+    this.chooseCity.code =
+      this.editorDataObject.province +
+      this.editorDataObject.city +
+      this.editorDataObject.county
+    this.submitData.areaCode = this.chooseCity.code
+
+    // id
+    this.submitData.id = this.editorDataObject.id
+
+    this.EditOrPost = true
+    this.VerifyCode = true
+
+    this.$apply()
+  }
+
+  // 弹窗提示
+  toastView(text) {
+    wx.showToast({
+      title: text,
+      icon: 'none',
+      duration: 1200
+    })
+  }
+}
+</script>
+<style lang="less">
+.item {
+  padding: 0 23rpx;
+  .header {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    height: 88rpx;
+    .span {
+      font-size: 32rpx;
+      font-weight: bold;
+      color: #2d2d33;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      line-height: 40rpx;
+      position: relative;
+      &:before {
+        content: '';
+        position: absolute;
+        left: -30rpx;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6rpx;
+        height: 28rpx;
+        background: #3b6afb;
+      }
+      .hint {
+        font-size: 24rpx;
+        line-height: 40rpx;
+        color: #6a6a77;
+        font-weight: 400;
+        margin-left: 24rpx;
+      }
+    }
+    .icon {
+      width: 88rpx;
+      height: 88rpx;
+      display: block;
+      font-family: 'TieJia';
+      text-align: center;
+      line-height: 88rpx;
+      text-align: right;
+      color: #9ea4af;
+    }
+  }
+  .li {
+    display: flex;
+    flex-direction: row;
+    .dian {
+      display: flex;
+      flex-wrap: wrap;
+      text-align: left;
+      // line-height: 68rpx;
+      padding-right: 30rpx;
+      font-size: 28rpx;
+      color: #6a6a77;
+    }
+    .title {
+      width: 114rpx;
+      height: 40rpx;
+      // padding-right: 20rpx;
+      box-sizing: border-box;
+      color: #6a6977;
+      display: block;
+      text-align: justify;
+      position: relative;
+      // line-height: 68rpx;
+      font-size: 28rpx;
+      flex-shrink: 0;
+      &:after {
+        content: '';
+        width: 100%;
+        display: inline-block;
+        overflow: hidden;
+        height: 0;
+      }
+      &:before {
+        content: '*';
+        position: absolute;
+        left: -15rpx;
+        top: 0;
+        height: 68rpx;
+        // line-height: 68rpx;
+        font-size: 28rpx;
+        color: #ff5b3e;
+      }
+    }
+  }
+}
+.more-button {
+  padding: 16rpx 0;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 70rpx;
+  text {
+    font-size: 28rpx;
+    color: #3b6afb;
+    font-weight: bold;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    &:after {
+      content: '\4E0B';
+      font-family: 'TieJia';
+      margin-left: 10rpx;
+      width: 26rpx;
+      height: 26rpx;
+      line-height: 26rpx;
+      color: #3b6afb;
+      text-align: center;
+    }
+  }
+}
+.submit {
+  width: 690rpx;
+  height: 90rpx;
+  line-height: 90rpx;
+  text-align: center;
+  background: #3b6afb;
+  border-radius: 4rpx;
+  font-size: 32rpx;
+  color: #ffffff;
+  font-weight: bold;
+  margin: 72rpx auto 24rpx;
+}
+.hint-title {
+  font-size: 24rpx;
+  color: #9ea4af;
+  display: block;
+  text-align: center;
+  margin-bottom: 120rpx;
+}
+</style>

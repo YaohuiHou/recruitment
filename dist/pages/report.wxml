@@ -1,0 +1,9 @@
+
+  <view class="report _8fd8abc">
+    <view class="select _8fd8abc">
+      <text class="title _8fd8abc">请选择举报原因：</text>
+      <text  wx:for="{{selesctItem}}" item="item" class="reportItem {{item.selected ? 'selectActive' : 'selectW'}} _8fd8abc" wx:key="index" bindtap="selectFun" data-wpyselectfun-a="{{index}}" data-wpyselectfun-b="{{item.k}}">{{item.v}}</text>
+    </view>
+    <textarea bindinput="valueChange" value="{{values}}" placeholder="请填写举报原因，最多500字..." maxlength="500" placeholder-style="font-size: 26rpx;color:#9ea4af;letter-spacing: 0.35rpx;" class="_8fd8abc"/>
+    <view class="roportBtn _8fd8abc" bindtap="requestReport"><text class="_8fd8abc">提交</text></view>
+  </view>

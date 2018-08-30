@@ -1,0 +1,265 @@
+<style lang="less">
+.show {
+  animation: rightAndLeft ease-in 0.2s;
+  animation-fill-mode: forwards;
+}
+.hide {
+  animation: leftAndRight ease-in 0.2s;
+  animation-fill-mode: forwards;
+}
+.engContent {
+  width: 100%;
+  height: 100vh;
+  padding-top: 44rpx;
+  box-sizing: content-box;
+  z-index: 9999;
+  background-color: #ffffff;
+  .label {
+    width: 670rpx;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 0 auto;
+    > view {
+      width: 33%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 40rpx;
+      max-width: 33%;
+    }
+    text {
+      display: block;
+      min-width: 140rpx;
+      margin: 0 auto;
+      padding: 0 10px;
+      height: 60rpx;
+      line-height: 60rpx;
+      text-align: center;
+      border: 1rpx solid rgba(158, 164, 175, 0.7);
+      border-radius: 8rpx;
+      font-size: 28rpx;
+      color: #4a4a53;
+      letter-spacing: 0.17rpx;
+    }
+    :nth-child(4) {
+      margin-right: 0 !important;
+    }
+    :nth-child(8) {
+      margin-right: 0 !important;
+    }
+    .active {
+      background: #3b6afb;
+      color: #ffffff;
+      border: 1rpx solid #3b6afb !important;
+    }
+  }
+  input {
+    margin-bottom: 170rpx;
+    width: 670rpx;
+    height: 80rpx;
+    margin: auto;
+    border: 1rpx solid rgba(158, 164, 175, 0.7);
+    border-radius: 98rpx;
+    font-size: 30rpx;
+    color: #2d2d33;
+    font-weight: bold;
+    letter-spacing: 0.17rpx;
+    text-align: center;
+    // flex: 1;
+  }
+  .btn {
+    width: 670rpx;
+    height: 80rpx;
+    margin: 170rpx auto 0 auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background: #3b6afb;
+    border-radius: 100rpx;
+    text {
+      font-size: 32rpx;
+      color: #ffffff;
+      letter-spacing: 0.2rpx;
+      text-align: center;
+    }
+  }
+}
+@keyframes rightAndLeft {
+  0% {
+    right: -100%;
+  }
+  100% {
+    right: 0%;
+  }
+}
+@keyframes leftAndRight {
+  0% {
+    right: 0;
+  }
+  100% {
+    right: -100%;
+  }
+}
+</style>
+<template>
+  <view class="engContent">
+    <view class="label">
+      <view wx:for="{{quantityList}}" wx:key="{{index}}">
+        <text
+          data-index="{{index}}"
+          data-id="{{item.k}}"
+          data-name="{{item.v}}"
+          @tap="chooseCompany"
+          class="{{ item.select ? 'active' : ''}}"
+        >{{item.v}}</text>
+      </view>
+      </view>
+    <view class="btn" @tap="sure"><text>确认</text></view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+
+export default class quantity extends wepy.page {
+  config = {
+    navigationBarTitleText: '工程类型'
+  }
+  components = {}
+
+  data = {
+    quantityList: [
+      {
+        k: 1,
+        v: '土石方',
+        select: false
+      },
+      {
+        k: 3,
+        v: '绿化',
+        select: false
+      },
+      {
+        k: 4,
+        v: '场地平整',
+        select: false
+      },
+      {
+        k: 5,
+        v: '道路',
+        select: false
+      },
+      {
+        k: 6,
+        v: '建筑',
+        select: false
+      },
+      {
+        k: 7,
+        v: '工厂',
+        select: false
+      },
+      {
+        k: 8,
+        v: '农田改造',
+        select: false
+      },
+      {
+        k: 9,
+        v: '刷坡',
+        select: false
+      },
+      {
+        k: 10,
+        v: '矿山',
+        select: false
+      },
+      {
+        k: 11,
+        v: '拆迁',
+        select: false
+      },
+      {
+        k: 12,
+        v: '市政工程',
+        select: false
+      },
+      {
+        k: 13,
+        v: '隧道',
+        select: false
+      },
+      {
+        k: 99,
+        v: '其他',
+        select: false
+      }
+    ],
+    chooseItems: []
+  }
+  events = {}
+  methods = {
+    // 选择
+    chooseCompany(e) {
+      var index = e.target.dataset.index
+      this.quantityList[index].select = !this.quantityList[index].select
+      if (!this.quantityList[index].select) {
+        this.chooseItems.splice(this.chooseItems.itemIndex, 1)
+      }
+
+      // 存储
+      if (this.quantityList[index].select) {
+        this.chooseItems.push({
+          itemIndex: this.chooseItems.length,
+          index: index,
+          value: this.quantityList[index].v,
+          key: this.quantityList[index].k
+        })
+        if (this.chooseItems.length > 3) {
+          this.quantityList[this.chooseItems[0].index].select = false
+          this.chooseItems.splice(0, 1)
+        }
+      }
+      this.$apply()
+    },
+    // 选中
+    sure() {
+      wx.setStorage({
+        key: 'worksRelation',
+        data: JSON.stringify(this.chooseItems)
+      })
+      // 返回
+      wx.navigateBack({
+        delta: 1
+      })
+    }
+  }
+  onLoad() {
+    wx.getStorage({
+      key: 'worksRelation',
+      success: res => {
+        if (res.data) {
+          let data = JSON.parse(res.data)
+          data.forEach(element => {
+            this.quantityList.forEach((item, i) => {
+              if (element.key == item.k) {
+                item.select = true
+                // 添加选中项
+                this.chooseItems.push({
+                  itemIndex: this.chooseItems.length,
+                  index: i,
+                  value: item.v,
+                  key: item.k
+                })
+              }
+            })
+          })
+          this.$apply()
+        }
+      }
+    })
+  }
+}
+</script>

@@ -1,0 +1,147 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span">加分项技能</text>
+      <!-- <text class="icon">问</text> -->
+    </view>
+    <view class="li require" wx:for="{{list}}" wx:for-index="indexItem" wx:key="{{indexItem}}" wx:for-item="itemLi">
+      <text class="title">{{itemLi.name}}</text>
+      <text class="dian">:</text>
+      <view class="types">
+        <view wx:for="{{itemLi.types}}" class="option {{item.select ? 'selected' : ''}}" @tap="selectFun('list','{{index}}','{{indexItem}}')" wx:key="{{index}}">
+            <text class="name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy'
+export default class Index extends wepy.component {
+  props = {
+    item: {},
+    editorDataObject: {
+      twoWay: true
+    }
+  }
+  watch = {
+    editorDataObject() {
+      // 添加详情数据
+      this.newEditorData()
+    }
+  }
+
+  data = {
+    // 其他
+    list: [
+      {
+        name: '拖车驾驶',
+        types: [
+          {
+            name: '会驾驶',
+            select: false,
+            value: 1,
+            type: 'trailerFlag'
+          },
+          {
+            name: '不会驾驶',
+            value: 2,
+            type: 'trailerFlag'
+          }
+        ]
+      },
+      {
+        name: '维修保养',
+        types: [
+          {
+            name: '懂维修保养',
+            value: 1,
+            type: 'repairFlag'
+          },
+          {
+            name: '不懂维修',
+            select: false,
+            value: 2,
+            type: 'repairFlag'
+          }
+        ]
+      }
+    ]
+  }
+  onLoad() {}
+
+  methods = {
+    selectFun(type, index, indexItem) {
+      let typeArr
+      typeArr = this.list[indexItem].types
+
+      typeArr.forEach((element, i) => {
+        element.select = false
+        if (i === index) {
+          element.select = true
+        }
+      })
+      this.$emit('editorData', typeArr[index].type, typeArr[index].value)
+    }
+  }
+
+  // 编辑数据
+  newEditorData() {
+    this.list.forEach(element => {
+      let type = this.editorDataObject[element.types[0].type]
+      if (type && type !== '') {
+        element.types[type - 1].select = true
+      }
+    })
+    this.$apply()
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  .li {
+    align-items: center;
+    .title:before {
+      display: none;
+    }
+    &.require {
+      padding: 20rpx 0;
+      .types {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-grow: 1;
+        .option {
+          flex: 1;
+          margin-right: 12rpx;
+          border: 1rpx solid rgba(189, 193, 201, 0.7);
+          border-radius: 4rpx;
+          height: 68rpx;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          justify-content: center;
+          &.selected {
+            background: rgba(59, 106, 251, 0.08);
+            border-color: rgba(59, 106, 251, 0.7);
+            text {
+              color: #3b6afb;
+              font-weight: bold;
+            }
+          }
+          &:last-child {
+            margin: 0;
+          }
+          .name {
+            font-size: 24rpx;
+            color: #4a4a53;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

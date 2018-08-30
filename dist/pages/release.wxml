@@ -1,0 +1,33 @@
+
+  <view class="content _aafcc3d">
+    <view class="replease _aafcc3d">
+      <view class="selectItem _aafcc3d" data-page="postjob" bindtap="navigator">
+        <view class="module _aafcc3d">
+          <image mode="aspectFit" src="https://bbs.cehome.com/wxApp/jobResume/imgs/job.svg" class="_aafcc3d"/>
+        </view>
+        <text class="_aafcc3d">我是老板，发布职位</text>
+      </view>
+      <view class="selectItem _aafcc3d" data-page="postResume" bindtap="navigator">
+        <view class="module _aafcc3d">
+          <image src="https://bbs.cehome.com/wxApp/jobResume/imgs/resume.svg" class="_aafcc3d"/>
+        </view>
+        <text class="_aafcc3d">我是机手，发布简历</text>
+      </view>
+    </view>
+
+    <block  wx:if="{{!isClose}}" class="_aafcc3d">
+      
+  <view class="login-mode {{!$LoginMode$isClose ? '' : 'hidden'}} _facbad4 _aafcc3d" bindtap="$LoginMode$isClose">
+    <view class="container _facbad4">
+      <text class="title _facbad4">登录或注册</text>
+      <button class="wxLogin _facbad4" type="primary" open-type="getUserInfo" bindgetuserinfo="$LoginMode$onGotUserInfo">
+        <text class="wx _facbad4">微信账号快速登录</text>
+      </button>
+      <button class="wxLogin _facbad4" bindtap="$LoginMode$goNavigator">
+        <text class="tel _facbad4">手机号注册/登录</text>
+      </button>
+      <!-- <text>{{text}}</text> -->
+    </view>
+  </view>
+    </block>
+  </view>

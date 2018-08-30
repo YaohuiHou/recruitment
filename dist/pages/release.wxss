@@ -1,0 +1,3 @@
+@import "./../components/userAuthorization.wxss";
+@import "./../components/LoginMode.wxss";
+.content._aafcc3d{height:100vh}.content .replease._aafcc3d{display:flex;flex-direction:row;justify-content:center;align-items:center;padding-top:140rpx}.content .replease .selectItem._aafcc3d{flex:1;display:flex;flex-direction:column;text-align:center;justify-content:center;align-items:center}.content .replease .selectItem .module._aafcc3d{margin-bottom:24rpx}.content .replease .selectItem .module image._aafcc3d{width:120rpx;height:120rpx}.content .replease .selectItem text._aafcc3d{font-size:24rpx;color:#9ea4af;letter-spacing:.21rpx}

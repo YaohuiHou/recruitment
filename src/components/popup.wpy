@@ -1,0 +1,237 @@
+/*
+ * @Author: Charlton
+ * @Date: 2018-06-11 19:05:45
+ * @Last Modified by: Charlton
+ * @Last Modified time: 2018-08-18 15:44:42
+ * @Document function and method: {function: ****
+ method: *** }
+ */
+
+<style lang="less" scoped>
+.popupHidden {
+  display: none !important;
+}
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  .container {
+    width: 600rpx;
+    height: auto;
+    padding: 75rpx 28rpx 43rpx 28rpx;
+    border-radius: 18rpx;
+    background-color: #ffffff;
+    image {
+      width: 210rpx;
+      height: 151rpx;
+    }
+    .icon {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      color: #7ed321;
+      margin-bottom: 27rpx;
+      &.tel {
+        &::before {
+          content: '\e646';
+          display: block;
+          font-family: 'TieJia';
+          font-size: 100rpx;
+          vertical-align: middle;
+        }
+      }
+      &::before {
+        content: '\e609';
+        display: block;
+        font-family: 'TieJia';
+        font-size: 80rpx;
+        vertical-align: middle;
+      }
+    }
+    .title {
+      display: inline-block;
+      margin-bottom: 36rpx;
+      font-size: 32rpx;
+      color: #000015;
+      font-weight: 700;
+      letter-spacing: 0.43rpx;
+      text-align: center;
+    }
+    .desc {
+      font-size: 26rpx;
+      color: #6a6a77;
+      letter-spacing: 0.35rpx;
+      text-align: center;
+    }
+    input {
+      width: 432rpx;
+      padding: 0 34rpx;
+      height: 88rpx;
+      line-height: 88rpx;
+      opacity: 0.97;
+      background: #f5f8fa;
+      border-radius: 4rpx;
+    }
+    .callPhone {
+      width: 500rpx;
+      height: 88rpx;
+      margin-top: 36rpx;
+      line-height: 88rpx;
+      border-radius: 4rpx;
+      font-size: 32rpx;
+      color: #ffffff;
+      letter-spacing: 0.43rpx;
+      text-align: center;
+      .callPhoneText {
+        color: #ffffff;
+      }
+      &.preActive {
+        background: #dce2ee;
+      }
+      &.active {
+        background: #00ce65;
+      }
+    }
+    .options {
+      margin-top: 75rpx;
+      text {
+        display: inline-block;
+        width: 245rpx;
+        height: 80rpx;
+        line-height: 80rpx;
+        text-align: center;
+        margin: 0 12rpx;
+      }
+      .cancal {
+        background: #f5f8fa;
+        border-radius: 4rpx;
+        font-size: 32rpx;
+        color: #6a6a77;
+        letter-spacing: 0.43rpx;
+      }
+      .sure {
+        background: #3b6afb;
+        border-radius: 4rpx;
+        font-size: 32rpx;
+        color: #ffffff;
+        letter-spacing: 0.43rpx;
+      }
+      .share {
+        display: flex;
+        justify-content: center;
+        width: 500rpx;
+        background: #3b6afb;
+        border-radius: 4rpx;
+        font-size: 30rpx;
+        color: #ffffff;
+        letter-spacing: 0.4rpx;
+        text-align: center;
+      }
+    }
+  }
+}
+</style>
+<template>
+  <view class="popup {{info.show ? '' : 'popupHidden'}}" @tap="hidePopup">
+    <block wx:if="{{info.type == 'notice'}}">
+      <view class="container">
+        <text class="title">{{info.title}}</text>
+        <text class="desc">{{info.desc}}</text>
+        <view class="options">
+          <text class="cancal" @tap="cancal">取消</text>
+          <text class="sure" @tap="sure">确认</text>
+        </view>
+      </view>
+    </block>
+    <block wx:if="{{info.type == 'success'}}">
+      <view class="container">
+        <text class="icon"></text>
+        <text class="title">{{info.title}}</text>
+        <text class="desc">{{info.desc}}</text>
+        <view class="options">
+          <button class='share' id="shareBtn" data-productId="{{productId}}" open-type="share" type="primary" hover-class="other-button-hover"><text class="share" @tap="share">转发需求到微信群</text></button>
+        </view>
+      </view>
+    </block>
+    <block wx:if="{{info.type == 'tel'}}">
+      <view class="container" catchtap="stop">
+        <image src="https://bbs.cehome.com/wxApp/jobResume/imgs/phone.svg"/>
+        <!-- <text class="icon tel"></text> -->
+        <text class="title">好工作不等人，赶紧电话联系吧~</text>
+        <input type="tel" maxlength="11" value="{{telValue}}" bindinput="change" placeholder="请输入手机号" placeholder-style="font-size: 26rpx;color:#9ea4af;letter-spacing: 0.35rpx;"/>
+        <view class="callPhone {{telValue.length > 0 ? 'active' : 'preActive'}}" @tap="callPhone"><text class="callPhoneText">免费通话</text></view>
+      </view>
+    </block>
+
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import { phoneVirtal } from '../utils/utils.js';
+export default class Group extends wepy.component {
+  props = {
+    info: {
+      twoWay: true
+    },
+    productId: {
+      twoWay: true
+    }
+  };
+  data = {
+    telValue: ''
+  };
+  components = {};
+  onLoad() {}
+
+  methods = {
+    stop() {
+      this.info.show = true;
+      this.$apply();
+    },
+    change(e) {
+      var value = e.detail.value;
+      this.telValue = value;
+      this.$apply();
+    },
+    sure() {
+      this.info.callback && this.info.callback('success');
+      this.info.show = false;
+    },
+    cancal() {
+      this.info.callback && this.info.callback('cancal');
+      this.info.show = false;
+    },
+    share() {
+      this.info.callback && this.info.callback('success');
+      this.info.show = false;
+    },
+    hidePopup() {
+      if (
+        this.info.type &&
+        (this.info.type == 'success' || this.info.type == 'tel')
+      ) {
+        this.info.show = false;
+      }
+    },
+    callPhone() {
+      if (phoneVirtal(this.telValue)) {
+        this.info.callback && this.info.callback(this.telValue);
+      } else {
+        wx.showToast({
+          title: '手机号输入有误',
+          icon: 'none',
+          duration: 2000
+        });
+      }
+    }
+  };
+}
+</script>

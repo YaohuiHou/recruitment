@@ -1,0 +1,1053 @@
+<style lang="less">
+.container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  .poup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    .poupContent {
+      position: relative;
+      width: 594rpx;
+      box-sizing: border-box;
+      padding: 44rpx 40rpx;
+      background: #ffffff;
+      border-radius: 4rpx;
+      background-color: #ffffff;
+      .icon {
+        position: absolute;
+        right: 22rpx;
+        top: 22rpx;
+        &::after {
+          content: '\e626';
+          display: block;
+          font-family: 'TieJia';
+          font-size: 22rpx;
+          vertical-align: middle;
+        }
+      }
+      .title {
+        margin-top: 40rpx;
+        font-size: 30rpx;
+        color: #2d2d33;
+        letter-spacing: 0.4rpx;
+        text-align: center;
+        line-height: 49rpx;
+      }
+      .liAuth {
+        background: #3b6afb;
+        width: 100%;
+        height: 80rpx;
+        margin: 68rpx 0 55rpx 0;
+        line-height: 80rpx;
+        border-radius: 4rpx;
+        font-size: 30rpx;
+        color: #ffffff;
+        letter-spacing: 0.4rpx;
+        text-align: center;
+      }
+      .awaitAuth {
+        background: #f5f8fa;
+        border-radius: 4rpx;
+        height: 80rpx;
+        line-height: 80rpx;
+        font-size: 28rpx;
+        color: #4a4a53;
+        letter-spacing: 0.37rpx;
+        text-align: center;
+      }
+    }
+  }
+  .mapHeader {
+    width: 100%;
+    height: 250rpx;
+    background-color: #ffffff;
+    .tarBars {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      .icon {
+        position: absolute;
+        right: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        &::after {
+          content: '\95ee';
+          font-family: 'TieJia';
+          position: absolute;
+          display: inline-block;
+          height: 68rpx;
+          line-height: 68rpx;
+          font-size: 34rpx;
+          color: #6a6a77;
+          right: 30rpx;
+        }
+      }
+      .tabItem {
+        .tabBtn {
+          width: 250rpx;
+          height: 68rpx;
+          line-height: 68rpx;
+          background: #ffffff;
+          border: 1rpx solid #dce2ee;
+          font-size: 32rpx;
+          color: #6a6a77;
+          letter-spacing: 0.28rpx;
+          text-align: center;
+          &.active {
+            background: #3b6afb;
+            color: #ffffff;
+            border-radius: 4rpx 0 0 4rpx;
+            border: none;
+          }
+        }
+      }
+    }
+    .screen {
+      // height: 100rpx;
+      padding: 10rpx 0 20rpx 0;
+      .screen-content {
+        display: flex;
+        padding: 20rpx 0;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        .screen-item {
+          position: relative;
+          flex: 1;
+          height: 40rpx;
+          line-height: 40rpx;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          font-size: 28rpx;
+          color: #6a6a77;
+          letter-spacing: 0.37rpx;
+          text-align: center;
+          justify-content: center;
+          // padding: 0 20rpx;
+
+          &.screen-item-active {
+            color: #3b6afb;
+            .text {
+              &::after {
+                display: inline-block;
+                margin-left: 8rpx;
+                content: '\e665';
+                font-family: 'TieJia';
+                color: #3b6afb;
+                font-size: 14rpx;
+              }
+            }
+          }
+          .text {
+            display: flex;
+            flex: 1;
+            height: 40rpx;
+            line-height: 40rpx;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            &::after {
+              display: block;
+              margin-left: 8rpx;
+              content: '\e665';
+              font-family: 'TieJia';
+              color: #bdc1c9;
+              font-size: 14rpx;
+            }
+            text {
+              display: block;
+              max-width: 150rpx;
+              line-height: 40rpx;
+              overflow: hidden; //超出的文本隐藏
+              text-overflow: ellipsis; //溢出用省略号显示
+              white-space: nowrap; //溢出不换行
+            }
+          }
+          &.active {
+            &::before {
+              position: absolute;
+              left: -15rpx;
+              content: '\e63a';
+              font-family: 'TieJia';
+              color: #dce2ee;
+              font-size: 28rpx;
+            }
+          }
+        }
+      }
+    }
+    .sreenLabel {
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+      // overflow-x: scroll;
+      .content {
+        position: relative;
+        .labelContent {
+          // display: flex;
+          // flex-direction: row;
+          white-space: nowrap;
+          :nth-child(1) {
+            margin-left: 20rpx;
+          }
+          .item {
+            display: inline-block;
+            margin-right: 20rpx;
+            padding: 0 20rpx;
+            height: 56rpx;
+            line-height: 56rpx;
+            font-size: 26rpx;
+            color: #4a4a53;
+            letter-spacing: 0.3rpx;
+            text-align: center;
+            background: #f5f8fa;
+            border-radius: 4rpx;
+            &.active {
+              background: #3b6afb;
+              color: #ffffff;
+              font-weight: 300;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>
+<template>
+  <view class="container">
+    <view class="mapHeader">
+    <view class="tarBars">
+      <view class="tabItem" wx:for="{{tarBar}}" wx:key="{{index}}" data-index="{{index}}" data-type="{{item.type}}" @tap="tabChange">
+        <view class="tabBtn {{item.selected ? 'active' : ''}}">{{item.name}}</view>
+      </view>
+      <text class="icon" @tap="navigateAbout"></text>
+    </view>
+    <view class="screen">
+      <view class="screen-content">
+        <view class="screen-item screen-item-active active" @tap="gotoLink">
+          <text class="text">
+            <block>
+              <text>{{chooseCity.name}}</text>
+            </block>
+          </text>
+        </view>
+        <view wx:for="{{screen}}" wx:for-index="itemIndex" wx:key="{{itemIndex}}" class="screen-item {{item.selected ? 'screen-item-active' : ''}} {{itemIndex != 0 ? 'active' : ''}}" data-index="{{itemIndex}}">
+          <block wx:if="{{itemIndex == 1}}">
+            <picker mode="multiSelector" bindchange="bindMultiPickerChange" bindcolumnchange="bindMultiPickerColumnChange" value="{{multiIndex}}" range="{{item.list}}">
+              <text class="text">
+                <block wx:if="{{item.selected}}">
+                  <text>{{item.list[1][multiIndex[1]]}}</text>
+                </block>
+                <block wx:if="{{!item.selected}}">
+                  <text>{{item.screenType}}</text>
+                </block>
+              </text>
+            </picker>
+          </block>
+          <block wx:if="{{itemIndex != 1}}">
+            <picker bindchange="bindPickerChange" bindcancel="cancal" data-index="{{itemIndex}}" value="{{item.screenItemIndex}}" range="{{item.list}}">
+              <text class="text">
+                <block wx:if="{{item.selected}}">
+                  <text>{{item.list[item.screenItemIndex]}}</text>
+                </block>
+                <block wx:if="{{!item.selected}}">
+                  <text>{{item.screenType}}</text>
+                </block>
+              </text>
+            </picker>
+          </block>
+        </view>
+      </view>
+    </view>
+    <view class="sreenLabel">
+      <scroll-view class="content" scroll-x="true">
+        <view class="labelContent">
+          <text wx:for="{{label}}" wx:key="{{index}}" data-index="{{index}}" class="item {{item.selected ? 'active' : ''}}" @tap="selectedLabel">{{item.v}}</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+    <map id="map" scale="{{scale}}"
+      markers="{{markers}}"
+      latitude="{{latitude}}"
+      bindcallouttap="bindcallouttap"
+      longitude="{{longitude}}"
+      controls="{{controls}}"
+      show-location="{{true}}"
+      style="width:100%; height:{{view.Height}}px">
+      <cover-view wx:if="{{isShowPoup}}" class="poup">
+        <cover-view class="poupContent">
+          <cover-view class="icon" @tap="close"></cover-view>
+          <cover-view class="title">
+            <cover-view>提交实名认证，正价简历/职位可信度</cover-view>
+            <cover-view>让找工作/简历的人更放心</cover-view>
+          </cover-view>
+          <cover-view class="liAuth" @tap="goAuth">立即认证</cover-view>
+          <cover-view class="awaitAuth" @tap="close">稍后去我的-我的认证提交认证</cover-view>
+        </cover-view>
+      </cover-view>
+     </map>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import qqmapwx from '../common/addressResolution.js'
+import request from '../common/request.js'
+import { connect } from 'wepy-redux'
+import { nowDate } from '../utils/utils.js'
+@connect({
+  state(state) {
+    return state
+  }
+})
+export default class Index extends wepy.page {
+  onShareAppMessage() {
+    return {
+      title: '我在这里找替班司机，技术好还便宜',
+      path: '/pages/index',
+      imageUrl: 'https://bbs.cehome.com/wxApp/jobResume/imgs/share.png',
+      success: function(res) {
+        // 转发成功
+      },
+      fail: function(res) {
+        // 转发失败
+      }
+    }
+  }
+  config = {
+    navigationBarTitleText: '招聘求职 · 铁甲网'
+  }
+  components = {}
+
+  data = {
+    canClick: true, //是否能点击跳转  作用避免连续点击跳转多个列表页
+    isShare: false, //是否从分享进入小程序
+    tarBar: [
+      {
+        name: '找工作',
+        type: 'job',
+        selected: true
+      },
+      {
+        name: '找司机',
+        type: 'driver'
+      }
+    ],
+    screenItemIndex: 0,
+    isShowPoup: false, //判断认证弹窗是否显示
+    mapType: 'job', //当前所在地图标记点数据是属于简历还是职位
+    chooseCity: {
+      name: '江苏省 南京市',
+      code: ''
+    },
+    multiIndex: [0, 0], //薪资选择器
+    driver: {
+      screenType: '设备类型',
+      selected: false,
+      type: 'deviceType', //简历设备类型
+      screenItemIndex: 0,
+      oList: {}, //源数据 ，包括k
+      list: []
+    },
+    job: {
+      screenType: '设备类型',
+      selected: false,
+      type: 'driverType',
+      screenItemIndex: 0,
+      oList: {}, //源数据 ，包括k
+      list: []
+    },
+    screen: [
+      {
+        screenType: '设备类型',
+        selected: false,
+        type: 'selectType',
+        screenItemIndex: 0,
+        oList: {}, //源数据 ，包括k
+        list: []
+      },
+      {
+        screenType: '薪资范围',
+        selected: false,
+        type: 'salaryType',
+        screenItemIndex: 0,
+        salaryType: [],
+        oList: [],
+        list: [[], []]
+      },
+      {
+        screenType: '经验要求',
+        selected: false,
+        type: 'drivingYears',
+        screenItemIndex: 0,
+        oList: [],
+        list: []
+      }
+    ],
+    label: [],
+    view: {
+      Height: wx.getStorageSync('ScreenH') - 250 / 2
+    },
+    scale: 12,
+    latitude: '',
+    longitude: '',
+    markers: [],
+    requestParams: {
+      areaCode: '',
+      deviceType: '', //简历设备类型
+      driverType: '', //职位设备类型
+      drivingYears: '',
+      labelPara: '',
+      salaryLower: '',
+      salaryType: '',
+      salaryUpper: ''
+    },
+    initParams: {
+      areaCode: '',
+      deviceType: '',
+      driverType: '',
+      drivingYears: '',
+      labelPara: '',
+      salaryLower: '',
+      salaryType: '',
+      salaryUpper: ''
+    },
+    isDriver: 'job'
+  }
+
+  computed = {}
+
+  methods = {
+    // 关闭弹窗
+    close() {
+      this.isShowPoup = false
+      this.$apply()
+    },
+    goAuth() {
+      wx.navigateTo({
+        url: `realAuthentication`
+      })
+    },
+    bindcallouttap(e) {
+      if (this.canClick) {
+        wx.removeStorage({ key: 'listParams' })
+        var action =
+          this.isDriver == 'driver'
+            ? '点击简历地图标记点'
+            : '点击职位地图标记点'
+
+        this.$parent.sensorsPublic.RelatedBurialPoint('地图标记', action)
+
+        wx.setStorage({
+          key: 'listParams',
+          data: JSON.stringify(this.requestParams),
+          success: res => {
+            wx.navigateTo({
+              url: `listPage?page=index&mapType=${this.mapType}&city=${escape(
+                e.markerId
+              )}`
+            })
+          }
+        })
+        setTimeout(() => {
+          this.canClick = true
+          this.$apply()
+        }, 2000)
+      }
+      this.canClick = false
+      this.$apply()
+    },
+    navigateAbout() {
+      wepy.navigateTo({
+        url: `about?type=homeAbout`
+      })
+    },
+    gotoLink() {
+      wepy.navigateTo({
+        url: `/pages/chooseCity?page=index`
+      })
+    },
+    selectedLabel(e) {
+      var index = e.currentTarget.dataset.index
+      this.label[index].selected = this.label[index].selected ? false : true
+      var str = '',
+        labelStr = ''
+      this.label.forEach((item, i) => {
+        if (item.selected) {
+          str += item.k + ','
+          labelStr += item.v + ','
+        }
+      })
+      str = str.substring(0, str.length - 1)
+      labelStr = labelStr.substring(0, labelStr.length - 1)
+      var action = this.isDriver == 'driver' ? '点击简历标签' : '点击职位标签'
+      this.$parent.sensorsPublic.RelatedBurialPoint(
+        '标签选项',
+        action,
+        labelStr
+      )
+
+      this.updateRequest(
+        'labelPara',
+        str,
+        this.requestParams.salaryLower,
+        this.requestParams.salaryUpper
+      )
+    },
+    tabChange(e) {
+      var index = e.currentTarget.dataset.index
+      var type = e.currentTarget.dataset.type
+      this.label = this[type]
+      this.tarBar.forEach((item, i) => {
+        item['selected'] = false
+        if (index == i) {
+          item['selected'] = true
+          if (this.isDriver == 'driver') {
+            this.requestParams['driverType'] = ''
+          } else {
+            this.requestParams['deviceType'] = ''
+          }
+          // 每次切换时清空处地区以外的请求参数
+          this.requestParams.drivingYears = ''
+          this.requestParams.labelPara = ''
+          this.requestParams.salaryType = ''
+          this.requestParams.salaryLower = ''
+          this.requestParams.salaryUpper = ''
+          this.$apply()
+          // 更换设备类型和经验要求
+          this.getAllD(item.type)
+          // 更新薪资类型
+          this.getLementType('ALL')
+          // 标识
+          this.mapType = i == 0 ? 'job' : 'resume'
+          this.isDriver = item.type
+          this.$apply()
+          this.getMapList()
+        }
+      })
+    },
+    bindPickerChange(e) {
+      var index = e.currentTarget.dataset.index
+      this.screen[index].selected = true
+      this.screen[index].screenItemIndex = e.detail.value
+      var rValue = this.screen[index].oList[e.detail.value].k
+      this.updateRequest(
+        this.screen[index].type,
+        rValue,
+        this.requestParams.salaryLower,
+        this.requestParams.salaryUpper
+      )
+      this.$apply()
+    },
+    bindMultiPickerChange(e) {
+      this.multiIndex = e.detail.value
+      this.screen[1].selected = true
+      var salaryLower = '',
+        salaryType = '',
+        salaryUpper = ''
+      var rValue = this.screen[1].oList[this.multiIndex[1]].v
+      salaryType = this.screen[1].salaryType[this.multiIndex[0]].k
+      switch (rValue) {
+        case '全部':
+          salaryLower = ''
+          salaryUpper = ''
+          break
+        case '100以下':
+          salaryLower = 0
+          salaryUpper = 100
+          break
+        case '1000以上':
+          salaryLower = 1000
+          salaryUpper = 99999
+          break
+        case '2000以下':
+          salaryLower = 0
+          salaryUpper = 2000
+          break
+        case '10000以上':
+          salaryLower = 10000
+          salaryUpper = 99999
+          break
+        default:
+          salaryLower = rValue.split('-')[0]
+          salaryUpper = rValue.split('-')[1]
+          break
+      }
+      this.updateRequest(
+        this.screen[1].type,
+        salaryType,
+        salaryLower,
+        salaryUpper
+      )
+
+      this.$apply()
+    },
+    bindMultiPickerColumnChange(e) {
+      this.multiIndex[e.detail.column] = e.detail.value
+      this.multiIndex[1] = 0
+      var type = ''
+      if (e.detail.column == 0) {
+        switch (e.detail.value) {
+          case 0:
+            type = 'ALL'
+            break
+          case 1:
+            type = 'SETTLEMENT_AMOUNT_DAY'
+            break
+          case 2:
+            type = 'SETTLEMENT_AMOUNT_MONTH'
+            break
+          case 3:
+            this.screen[1].list[1] = ['薪资面议']
+            type = 'FACE_TO_FACE'
+
+            break
+          default:
+            break
+        }
+        this.getLementType(type)
+      }
+
+      this.screen[1].selected = true
+      this.$apply()
+    }
+  }
+  watch = {
+    requestParams(newVal, oldVal) {
+      this.getMapList()
+    }
+  }
+  // 筛选数据更新
+  updateRequest(type, value, salaryLower, salaryUpper) {
+    if (type == 'selectType' && this.isDriver == 'driver') {
+      this.requestParams['deviceType'] = value
+    } else if (type == 'selectType' && this.isDriver != 'driver') {
+      this.requestParams['driverType'] = value
+    } else {
+      this.requestParams[type] = value
+    }
+
+    this.requestParams = {
+      ...this.requestParams,
+      salaryLower: salaryLower,
+      salaryUpper: salaryUpper
+    }
+    this.getMapList()
+
+    this.$apply()
+  }
+  events = {}
+  // 选取所在地code
+  getSchoolMarkers(listData) {
+    var market = []
+    for (let item of listData) {
+      let marker1 = this.createMarker(item)
+      market.push(marker1)
+    }
+    return market
+  }
+  // 把所得到的列表数据处理成地图标记点（marker）所需数据
+  createMarker(point) {
+    let latitude = point.latitude
+    let longitude = point.longitude
+    let marker = {
+      iconPath: 'https://bbs.cehome.com/wxApp/jobResume/imgs/home.png',
+      id: `${point.adName}&${point.adCode}`,
+      latitude: latitude,
+      longitude: longitude,
+      callout: {
+        content: `${point.adName}\n${point.acCount}个`,
+        color: '#ffffff',
+        borderRadius: 10,
+        bgColor: '#00ce65',
+        padding: 22 / 2,
+        display: 'ALWAYS',
+        textAlign: 'center',
+        borderWidth: 1,
+        borderColor: '#00ad47'
+      },
+      alpha: 1,
+      anchor: {
+        x: 0.5,
+        y: 0.5
+      },
+      width: 1,
+      height: 1
+    }
+    return marker
+  }
+  // 解析经纬度并得到对应的详细信息
+  getAdInfo = async (loact, that) => {
+    var that = this
+    qqmapwx.ReverseGeocoder(loact, function(res) {
+      if (res.status == 0) {
+        var code = `${res.result.ad_info.adcode.substring(0, 4)}00`
+        that.requestParams = {
+          ...that.requestParams,
+          areaCode: code
+        }
+        that.chooseCity = {
+          ...that.chooseCity,
+          name: `${res.result.ad_info.province} ${res.result.ad_info.city}`
+        }
+        // that.$parent.methods.showToast();
+        that.getMapList()
+
+        wx.setStorage({
+          key: 'JOBchooseCity',
+          data: JSON.stringify({
+            code: code,
+            province: res.result.ad_info.province,
+            city: res.result.ad_info.city,
+            district: ''
+          })
+        })
+      }
+      that.$apply()
+    })
+  }
+  // 获取地理定位
+  // 说明：
+  // 如果有上一次地理信息，显示上一次对应的数据，如果没有重新获取
+  // 获取地理信息失败 默认显示江苏省常州市 数据
+  getLocation = () => {
+    var that = this
+    wx.getStorage({
+      key: 'preLocation',
+      complete: async res => {
+        if (res.data) {
+          var data = JSON.parse(res.data)
+          this.getAdInfo(data)
+        } else {
+          wx.getLocation({
+            type: 'gcj02', //返回可以用于wx.openLocation的经纬度
+            success: async loact => {
+              // var loact = {
+              //   longitude: '118.79647',
+              //   latitude: '32.05838'
+              // }
+              that.latitude = loact.latitude
+              that.longitude = loact.longitude
+              that.getAdInfo(loact, that)
+              that.$apply()
+            },
+            fail: err => {
+              var loact = {
+                longitude: '118.79647',
+                latitude: '32.05838'
+              }
+              that.getAdInfo(loact, that)
+            }
+          })
+        }
+      }
+    })
+  }
+  onShow() {
+    // 如果当从分享页面进入小程序时调用一次首页所以方法，避免从详情页返回时地图数据为空
+    if (this.isShare) {
+      this.initFun()
+      this.isShare = false
+      this.$apply()
+    }
+    wx.getStorage({
+      key: 'IndexChooseCity',
+      complete: async res => {
+        if (res.data) {
+          let data = JSON.parse(res.data)
+          this.chooseCity = {
+            ...this.chooseCity,
+            name: `${data.province} ${data.city}`,
+            code: `${data.code.substring(0, 4)}00`
+          }
+          this.requestParams = {
+            ...this.requestParams,
+            areaCode: `${data.code.substring(0, 4)}00`
+          }
+          this.$apply()
+        }
+      }
+    })
+  }
+  // 判断注册用户是否认证 如未认证每天弹一次 提示认证弹窗
+  getUserAuthInfo() {
+    request
+      .cehomeRequest(request.Api.getUserAuthInfo(), {}, 'GET')
+      .then(res => {
+        if (
+          res.statusCode === 200 &&
+          res.data.ret == 201003 &&
+          this.state.login.status == 'success'
+        ) {
+          var registerTime = wx.getStorageSync('isPopup').registerTime
+          var isPopup = wx.getStorageSync('isPopup').isPopup
+          var now_date = nowDate(new Date().getTime())
+
+          // 当天是否弹出
+          if (registerTime == now_date && isPopup) {
+            this.isShowPoup = true
+            wx.setStorageSync('isPopup', {
+              registerTime: now_date,
+              isPopup: false
+            })
+            // 以后每天弹一次
+          } else if (registerTime != now_date && !isPopup) {
+            this.isShowPoup = true
+            wx.setStorageSync('isPopup', {
+              registerTime: now_date,
+              isPopup: false
+            })
+          }
+          this.$apply()
+        }
+      })
+  }
+  async onLoad(options) {
+    if (options.shareType) {
+      wx.navigateTo({
+        url: `${options.shareType}?id=${options.id}&page=mapList`
+      })
+      this.isShare = true
+      return
+    }
+    this.initFun()
+
+    // test
+    request
+      .cehomeRequest(
+        request.Api.testFun(),
+        {
+          tid: 1320625,
+          pageNo: 2
+        },
+        'GET',
+        this
+      )
+      .then(res => {
+        console.log(res)
+      })
+  }
+  // 首页各类方法调用
+  initFun = async () => {
+    // 版本更新
+    const updateManager = wx.getUpdateManager()
+    updateManager.onCheckForUpdate(function(res) {
+      // 请求完新版本信息的回调
+    })
+
+    updateManager.onUpdateReady(function() {
+      wx.showModal({
+        title: '更新提示',
+        content: '新版本已经准备好，是否重启应用？',
+        success: function(res) {
+          if (res.confirm) {
+            // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+            updateManager.applyUpdate()
+          }
+        }
+      })
+    })
+
+    this.$parent.methods.showLoading('玩命加载中...')
+    this.isDriver = 'job'
+    this.getLocation()
+
+    // 获取标签数据
+    // 判断本地有误字典数据
+    var sValus = await this.getAllDictionarles()
+
+    if (sValus == 'no') {
+      await this.requestGetAllDictionarles()
+    }
+    // 薪资类型
+    this.getLementType('ALL')
+    // 获取筛选项数据
+    this.getAllD()
+
+    setTimeout(() => {
+      this.getUserAuthInfo()
+    }, 1000)
+
+    this.$apply()
+  }
+  requestGetAllDictionarles() {
+    var that = this
+
+    return new Promise((resolve, reject) => {
+      request
+        .cehomeRequest(request.Api.getAllDictionarles(), {}, 'GET', that)
+        .then(res => {
+          if (res.statusCode === 200 && res.data.ret == 0) {
+            wx.setStorage({
+              key: 'allDictionarles',
+              data: JSON.stringify(res.data.data)
+            })
+            resolve('ok')
+          }
+        })
+        .catch(err => {
+          reject('err')
+        })
+    })
+  }
+  getAllDictionarles() {
+    var that = this
+    return new Promise((resolve, reject) => {
+      wx.getStorage({
+        key: 'allDictionarles',
+        complete: async res => {
+          if (res.data) {
+            resolve('ok')
+          } else {
+            resolve('no')
+          }
+        }
+      })
+    })
+  }
+  // 获取地图数据
+  getMapList = type => {
+    var that = this
+
+    var url =
+      this.isDriver == 'driver'
+        ? request.Api.getResumeListByAd()
+        : request.Api.getHiringDriverListByAd()
+
+    var pageTitle =
+      this.isDriver == 'driver' ? '我要找司机界面' : '我要找工作界面'
+    this.$parent.sensorsPublic.autoTrackPageShow(pageTitle)
+    // 通过adcode第四位判断是省数据还是市数据来缩放地图
+    var code = this.requestParams.areaCode
+    if (code[3] == 0 && code[2] == 0) {
+      this.scale = 8
+    } else {
+      this.scale = 11
+    }
+    return new Promise((resolve, reject) => {
+      request.cehomeRequest(url, this.requestParams, 'GET', that).then(res => {
+        this.$parent.methods.hideLoading()
+        if (
+          res.statusCode === 200 &&
+          res.data.ret == 0 &&
+          res.data.data.item.length > 0
+        ) {
+          that.latitude = res.data.data.item[0].latitude
+          that.longitude = res.data.data.item[0].longitude
+
+          // 记录上一次地理定位
+          wx.setStorage({
+            key: 'preLocation',
+            data: JSON.stringify({
+              adcode: res.data.data.adcode,
+              latitude: res.data.data.latitude,
+              longitude: res.data.data.longitude
+            })
+          })
+          this.markers = []
+          that.markers = that.getSchoolMarkers(res.data.data.item)
+          this.$parent.methods.hideLoading()
+        } else if (
+          res.statusCode === 200 &&
+          res.data.ret == 0 &&
+          res.data.data.item.length <= 0
+        ) {
+          this.markers = []
+          this.$parent.methods.showToast('当前地区暂无符合条件的信息')
+        }
+        this.$apply()
+      })
+    })
+  }
+  // 薪资类型
+  getLementType = type => {
+    if (type == 'FACE_TO_FACE') return
+
+    wx.getStorage({
+      key: 'allDictionarles',
+      complete: async res => {
+        if (res.data) {
+          var data = JSON.parse(res.data)
+          // 薪资类型
+          this.screen[1].selected = false
+          data['SETTLEMENT_TYPE'].unshift({ k: '', v: '全部' })
+          this.screen[1].salaryType = data['SETTLEMENT_TYPE']
+          this.screen[1].list[0] = data['SETTLEMENT_TYPE'].map((item, i) => {
+            return item.v.replace(/\n/g, '')
+          })
+          if (type == 'ALL') {
+            this.screen[1].oList = [{ k: '', v: '全部' }]
+
+            this.screen[1].list[1] = ['全部']
+          } else {
+            this.screen[1].oList = data[type]
+            this.screen[1].list[1] = data[type].map((item, i) => {
+              return item.v.replace(/\n/g, '')
+            })
+          }
+          this.$apply()
+        }
+      }
+    })
+  }
+  // 获取本地字典数据 并 切换地图模式（找工作、找司机）可切换对应的字典数据
+  // DEVICE_TYPE 设备类型
+  // DRIVING_YEARS_HIRING 找司机标签
+  // RESUME_LABELPARA 找工作标签
+  getAllD = type => {
+    wx.getStorage({
+      key: 'allDictionarles',
+      complete: async res => {
+        if (res.data) {
+          var data = JSON.parse(res.data)
+          // 设备类型
+          this.screen[0].selected = false
+          data['DEVICE_TYPE'].unshift({ k: '', v: '全部' })
+          this.screen[0].oList = data['DEVICE_TYPE']
+          this.screen[0].list = data['DEVICE_TYPE'].map((item, i) => {
+            return item.v.replace(/\n/g, ' ')
+          })
+          var driver_year = ''
+          var labelType = ''
+          if (type == 'driver') {
+            labelType = 'RESUME_LABELPARA'
+            type = 'DRIVING_YEARS'
+            data[type].unshift({ k: '', v: '全部' })
+          } else {
+            type = 'DRIVING_YEARS_HIRING'
+            labelType = 'HIRINGDRIVER_LABELPARA'
+          }
+          // 经验要求
+          this.screen[2].selected = false
+          this.screen[2].oList = data[type]
+          this.screen[2].list = data[type].map((item, i) => {
+            return item.v.replace(/\n/g, ' ')
+          })
+          // this.screen[2].list.unshift('不限');
+          // 标签
+          this.label = data[labelType].map((item, i) => {
+            item['selected'] = false
+            return item
+          })
+          this.$apply()
+        }
+      }
+    })
+  }
+}
+</script>

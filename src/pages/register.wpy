@@ -1,0 +1,136 @@
+<template>
+  <view class="container">
+    <text class="title">手机快捷登录</text>
+    <view class="inputGroup">
+      <input type="number" focus maxlength="11" value="{{inputVal}}" bindinput="phoneChange"/>
+      <text class="icon" @tap="deleteVal"></text>
+    </view>
+    <block wx:if="{{inputVal == ''}}">
+      <view class="btn default"><text>下一步</text></view>
+    </block>
+    <block wx:if="{{inputVal != ''}}">
+      <view class="btn btnActive" @tap="submit"><text>下一步</text></view>
+    </block>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { phoneVirtal } from '../utils/utils.js';
+import request from '../common/request.js';
+// import mixins from '../mixins';
+
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: ''
+  };
+  components = {};
+
+  // mixins = [mixins];
+
+  data = {
+    inputVal: ''
+  };
+  watch = {};
+
+  methods = {
+    phoneChange(e) {
+      this.inputVal = e.detail.value;
+      this.$apply();
+    },
+    deleteVal() {
+      this.inputVal = '';
+      this.$apply();
+    },
+    submit() {
+      if (this.inputVal == '') {
+        this.$parent.methods.showToast('手机号不能为空');
+      } else if (!phoneVirtal(this.inputVal)) {
+        this.$parent.methods.showToast('手机号输入错误');
+      } else {
+        // wx.setStorage({
+        //   key: 'verifyData',
+        //   data: JSON.stringify({ mobile: this.inputVal })
+        // });
+        wx.navigateTo({
+          url: `verificationCode?mobile=${this.inputVal}`
+        });
+      }
+    }
+  };
+
+  events = {};
+  onLoad() {
+    // var that = this;
+  }
+  onShow() {}
+}
+</script>
+
+<style lang="less" scoped>
+.container {
+  padding: 40rpx 63rpx 0 63rpx;
+  .title {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    font-size: 44rpx;
+    color: #2d2d33;
+    letter-spacing: 0.59rpx;
+  }
+  .btnActive {
+    background: #3b6afb;
+    text {
+      color: #ffffff;
+    }
+  }
+  .default {
+    background: rgba(59, 106, 251, 0.4);
+    text {
+      color: #ffffff;
+    }
+  }
+  .btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 615rpx;
+    height: 92rpx;
+
+    border-radius: 4rpx;
+    text {
+      font-size: 32rpx;
+      letter-spacing: 0.43rpx;
+      text-align: center;
+    }
+  }
+  .inputGroup {
+    display: flex;
+    width: 100%;
+    padding: 20rpx 0;
+    margin: 55rpx 0 96rpx 0;
+    border-bottom: 1rpx solid #dce2ee;
+    input {
+      flex: 1;
+      font-size: 44rpx;
+      color: #4a4a53;
+      letter-spacing: 0.59rpx;
+    }
+    .icon {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      color: #dce2ee;
+      &::before {
+        content: '\e626';
+        display: block;
+        padding-right: 13rpx;
+        font-family: 'TieJia';
+        font-size: 28rpx;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+</style>

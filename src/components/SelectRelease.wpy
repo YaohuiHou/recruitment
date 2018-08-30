@@ -1,0 +1,90 @@
+<template>
+  <view class="login-mode">
+    <userAuthorization/>
+    <view class="container">
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import userAuthorization from './userAuthorization';
+export default class loginMode extends wepy.component {
+  components = {
+    userAuthorization
+  };
+  data = {};
+  events = {};
+
+  watch = {};
+
+  onLoad() {
+    // this.userInfo:
+  }
+  events = {
+    phoneAuthorizat: res => {}
+  };
+  onGotUserInfo = function(e) {};
+  methods = {};
+}
+</script>
+<style lang="less" scoped>
+.login-mode {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9;
+  .login {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+  }
+  .container {
+    width: 500rpx;
+    height: 400rpx;
+    padding: 50rpx 0;
+    border-radius: 20rpx;
+    background-color: #ffffff;
+    .title {
+      font-size: 30rpx;
+    }
+    .wxLogin {
+      width: 400rpx;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      .wx {
+        font-size: 30rpx;
+        &::before {
+          content: '\e7c5';
+          display: inline-block;
+          font-family: 'TieJia';
+          margin-right: 20rpx;
+          font-size: 30rpx;
+          color: #dadce0;
+          vertical-align: middle;
+        }
+      }
+      .tel {
+        font-size: 30rpx;
+        &::before {
+          content: '\e612';
+          display: inline-block;
+          font-family: 'TieJia';
+          margin-right: 20rpx;
+          font-size: 30rpx;
+          color: #dadce0;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+}
+</style>
+
+

@@ -1,0 +1,620 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span">个人基本信息</text>
+      <text class="icon" @tap="gotoLink('about')">问</text>
+    </view>
+    <view class="personalName">
+      <view class="left">
+        <view class="li change-li">
+          <text class="title">姓名</text>
+          <text class="dian">:</text>
+          <input type="text" maxlength="5" value="{{personalInfo.name}}" placeholder="点击输入" data-type="name"  bindblur="inputFun" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;"/>
+        </view>
+        <view class="li change-li">
+          <text class="title">电话</text>
+          <text class="dian">:</text>
+          <input type="number" maxlength="11" value="{{personalInfo.tel}}" placeholder="点击输入" data-type="tel" bindblur="inputFun" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;"/>
+        </view>
+      </view>
+      <view class="header-phone">
+          <view class="close" wx:if="{{personalInfo.headPortrait != ''}}" @tap="deleteFun">删</view>
+        <view class="photo" @tap="chooseImage">
+          <text wx:if="{{personalInfo.headPortrait == ''}}">点击上传</text>
+          <image  wx:if="{{personalInfo.headPortrait != ''}}" src="{{personalInfo.headPortrait}}"/>
+        </view>
+      </view>
+    </view>
+    <view class="li change-li" wx:if="{{VerifyCode}}">
+      <text class="title">验证码</text>
+      <text class="dian">:</text>
+      <view class="verifyContent">
+        <input class="verify" type="number" maxlength="4" value="{{personalInfo.verificationCode}}" placeholder="输入验证码" data-type="verificationCode"  bindblur="inputFun" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;"/>
+        <block wx:if="{{can}}">
+          <view class="btn" @tap="getVerifyCode"><text>{{verificationInfo}}</text></view>
+        </block>
+        <block wx:if="{{!can}}">
+          <view class="btn active"><text>{{verificationInfo}}</text></view>
+        </block>
+      </view>
+    </view>
+    <view class="li change-li">
+      <text class="title">求职地点</text>
+      <text class="dian">:</text>
+      <view class="citys" @tap="gotoLink('chooseCity')">
+        <text class="city">{{chooseCity.name}}</text>
+        <text class="right"></text>
+      </view>
+    </view>
+    <view class="li require" wx:for="{{list}}" wx:key="{{index}}" wx:for-item="itemLi">
+      <text class="title">{{itemLi.name}}</text>
+      <text class="dian">:</text>
+      <view class="jobCity">
+        <view class="types">
+          <view wx:for="{{itemLi.types}}" class="option {{item.select ? 'selected' : ''}}" wx:key="{{index}}" data-index="{{index}}" @tap="selecedWork">
+              <text class="name">{{item.name}}</text>
+          </view>
+        </view>
+        <text class="desc">{{itemLi.desc}}</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy'
+import request from '../common/request.js'
+import { isEmojiCharacter, phoneVirtal } from '../utils/utils.js'
+import { connect } from 'wepy-redux'
+
+@connect({
+  state(state) {
+    return state
+  }
+})
+export default class Index extends wepy.component {
+  props = {
+    item: {},
+    submitFunDisabled: {
+      twoWay: true
+    },
+    editorDataObject: {
+      twoWay: true
+    },
+    chooseCity: {
+      twoWay: true
+    }
+  }
+  data = {
+    VerifyCode: false,
+    list: [
+      {
+        name: '工作区域',
+        desc: '异地求职和工作，请对招聘方多做沟通和了解',
+        types: [
+          {
+            name: '只在本地',
+            select: true
+          },
+          {
+            name: '可去外地'
+          }
+        ]
+      }
+    ],
+    time: 60,
+    timer: null,
+    can: true,
+    Seconds: '',
+    verificationInfo: '点击获取验证码',
+    personalInfo: {
+      headPortrait: '', //
+      name: '', //
+      tel: '', //
+      verificationCode: '', //
+      area: '', //
+      areaCode: '', //
+      workRegion: ''
+    }
+  }
+
+  onLoad() {
+    if (this.state.login.login) {
+      this.personalInfo.tel = this.state.login.userInfo.mobile
+      this.$apply()
+    }
+  }
+
+  watch = {
+    editorDataObject() {
+      // 添加详情数据
+      this.newEditorData()
+    },
+    // 倒计时
+    Seconds() {
+      if (this.time <= 0) {
+        this.verificationInfo = '点击重新发送验证码'
+        this.can = true
+        this.time = 60
+        this.$apply()
+        return
+      } else {
+        this.verificationInfo = '重新发送 ' + '( ' + this.time + 's' + ' )'
+        this.can = false
+        this.time--
+      }
+      let timer = setTimeout(() => {
+        this.getNowFormatDate()
+        clearTimeout(timer)
+      }, 1000)
+      this.$apply()
+    }
+  }
+
+  methods = {
+    selecedWork(e) {
+      var index = e.currentTarget.dataset.index
+      this.selecedWorkFun(index)
+    },
+    // 失去焦点保存
+    inputFun(e) {
+      let val = e.detail.value
+      let type = e.target.dataset.type
+
+      switch (type) {
+        // 验证手机号
+        case 'tel':
+          if (
+            /^1(([38]\d)|(4[57])|(5[012356789])|(6[6])|(7[0678])|(9[89]))\d{8}$/.test(
+              val
+            )
+          ) {
+            // 更换手机号发送验证码
+            if (val != this.state.login.userInfo.mobile) {
+              this.VerifyCode = true
+            } else {
+              this.VerifyCode = false
+            }
+            // 保存手机号
+            this.$emit('editorData', 'tel', val)
+          } else {
+            wx.showToast({
+              title: '请输入正确的手机号',
+              icon: 'none',
+              duration: 1200
+            })
+            this.$emit('editorData', 'tel', '')
+            return
+          }
+          break
+
+        case 'name':
+          if (val.length <= 0) {
+            wx.showToast({
+              title: '请输入联系人姓名',
+              icon: 'none',
+              duration: 1200
+            })
+          }
+          break
+        case 'verificationCode':
+          if (val.length <= 0) {
+            wx.showToast({
+              title: '验证码不能为空',
+              icon: 'none',
+              duration: 1200
+            })
+          } else {
+            // 验证码验证
+          }
+          break
+      }
+
+      this.personalInfo[type] = val
+      this.$apply()
+      this.$emit('editorData', e.target.dataset.type, val)
+    },
+    // 删除
+    deleteFun() {
+      this.personalInfo.headPortrait = ''
+      this.$emit('editorData', 'headPortrait', '')
+      this.$apply()
+    },
+    // 上传图
+    chooseImage() {
+      wx.chooseImage({
+        count: 1, // 默认9
+        sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+        sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+        success: res => {
+          this.submitFunDisabled = true
+          // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
+          var tempFilePaths = res.tempFilePaths[0]
+          this.personalInfo.headPortrait = tempFilePaths
+          this.$apply()
+          wx.uploadFile({
+            url: request.Api.upImageFile(),
+            filePath: tempFilePaths,
+            name: 'file',
+            header: request.getHeaderData(),
+            complete: res => {
+              this.submitFunDisabled = false
+              this.$apply()
+              var data = JSON.parse(res.data)
+              if (data.ret == '0') {
+                // 保存
+                this.$emit('editorData', 'headPortrait', data.data)
+              } else {
+                wepy.showToast({
+                  icon: 'none',
+                  title: '网络问题，请重新上传~',
+                  duration: 1500
+                })
+              }
+            }
+          })
+        }
+      })
+    },
+    getVerifyCode() {
+      var tel = this.personalInfo.tel
+      if (!phoneVirtal(tel)) {
+        wx.showToast({
+          title: '手机号输入有误',
+          icon: 'none',
+          duration: 2000
+        })
+      } else {
+        this.getNowFormatDate()
+        this.verificationCodeFun()
+      }
+    },
+    gotoLink(type) {
+      wepy.navigateTo({
+        url: `/pages/${type}`
+      })
+    }
+  }
+
+  // 区域选择
+  selecedWorkFun(index) {
+    if (index == 0) {
+      this.list[0].types[0]['select'] = true
+      this.list[0].types[1]['select'] = false
+      this.personalInfo.workRegion = 1
+      this.$emit('editorData', 'workRegion', 1)
+    } else if (index == 1) {
+      this.list[0].types[1]['select'] = true
+      this.list[0].types[0]['select'] = false
+      this.personalInfo.workRegion = 2
+      this.$emit('editorData', 'workRegion', 2)
+    }
+  }
+
+  // 编辑数据
+  newEditorData() {
+    // 验证码输入
+    this.VerifyCode = false
+    for (const key in this.personalInfo) {
+      this.personalInfo[key] = this.editorDataObject[key]
+    }
+    this.selecedWorkFun(this.editorDataObject.workRegion - 1)
+    this.$apply()
+  }
+
+  // 实时定时器
+  getNowFormatDate() {
+    var date = new Date()
+    let Hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+    let Minutes =
+      date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+    let Seconds =
+      date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()
+    this.Seconds = Seconds
+    this.$apply()
+  }
+
+  // 验证码
+  verificationCodeFun() {
+    request
+      .cehomeRequest(
+        request.Api.getPhoneCode(),
+        { phoneNumber: this.personalInfo.tel },
+        'POST',
+        this
+      )
+      .then(res => {
+        if (res.data.ret === '0') {
+          wx.showToast({
+            title: '验证码发送成功，注意查收',
+            icon: 'none',
+            duration: 1200
+          })
+          return
+        }
+        wx.showToast({
+          title: res.data.msg,
+          icon: 'none',
+          duration: 1200
+        })
+      })
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  .personalName {
+    display: flex;
+    flex-direction: row;
+    .header-phone {
+      position: relative;
+      .close {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 60rpx;
+        height: 60rpx;
+        line-height: 60rpx;
+        text-align: center;
+        border-radius: 50%;
+        border: 1rpx solid #fff;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        font-size: 24rpx;
+        font-family: 'TieJia';
+      }
+    }
+    .photo {
+      width: 164rpx;
+      height: 220rpx;
+      margin-left: 30rpx;
+      display: flex;
+      overflow: hidden;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f3f3f3;
+      image {
+        width: 164rpx;
+        height: 220rpx;
+      }
+      text {
+        text-align: center;
+        font-size: 28rpx;
+        color: #999999;
+        &::before {
+          content: '\4f20';
+          display: block;
+          margin-bottom: 50rpx;
+          font-family: 'TieJia';
+          font-size: 70rpx;
+          color: #3b6afb;
+          line-height: 34rpx;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+  .li {
+    &.name {
+      border-bottom: 1rpx solid rgba(220, 226, 238, 0.6);
+      padding: 26rpx 0;
+      .title {
+        line-height: 40rpx;
+        &:before {
+          line-height: 40rpx;
+        }
+      }
+    }
+    &.change-li {
+      border-bottom: 1rpx solid rgba(220, 226, 238, 0.6);
+      padding: 26rpx 0;
+      // margin-bottom: 50rpx;
+      align-items: center;
+      .title {
+        line-height: 40rpx;
+        &:before {
+          line-height: 40rpx;
+        }
+      }
+      .verifyContent {
+        display: flex;
+        flex-direction: row;
+        .verify {
+          flex: 1;
+          font-size: 32rpx;
+          line-height: 40rpx;
+        }
+        .btn {
+          &.active {
+            text {
+              color: #9ea4af;
+            }
+          }
+          text {
+            position: relative;
+            font-size: 28rpx;
+            color: #3b6afb;
+            letter-spacing: 0.25rpx;
+            text-align: center;
+            &::before {
+              content: '\e63a';
+              font-family: 'TieJia';
+              color: #dce2ee;
+              font-size: 28rpx;
+            }
+          }
+        }
+      }
+    }
+    .citys {
+      display: flex;
+      justify-content: space-between;
+      flex-grow: 1;
+      align-items: center;
+      text {
+        font-size: 32rpx;
+        color: #4a4a53;
+        line-height: 40rpx;
+      }
+      .right {
+        display: block;
+        transform: rotate(45deg);
+        border-top: 3rpx solid #bdc1c9;
+        border-right: 3rpx solid #bdc1c9;
+        width: 14rpx;
+        height: 14rpx;
+      }
+    }
+    // }
+    &.device {
+      padding-bottom: 20rpx;
+      .types {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        .grab {
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          margin-bottom: 20rpx;
+          .em {
+            flex: 1;
+            margin-right: 12rpx;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            &:last-child {
+              margin: 0;
+            }
+            &.selected {
+              background: rgba(59, 106, 251, 0.08);
+              border-color: rgba(59, 106, 251, 0.7);
+              text {
+                color: #3b6afb;
+                font-weight: bold;
+              }
+            }
+            text {
+              display: block;
+            }
+            .name {
+              font-size: 24rpx;
+              line-height: 32rpx;
+              color: #4a4a53;
+            }
+            .span {
+              font-size: 20rpx;
+              color: #9ea4af;
+            }
+          }
+        }
+        .other {
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          .em {
+            margin-right: 12rpx;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            width: calc(~'33% - 12rpx');
+            justify-content: center;
+            flex-shrink: 0;
+            .name {
+              font-size: 24rpx;
+              color: #4a4a53;
+            }
+            &.selected {
+              background: rgba(59, 106, 251, 0.08);
+              border-color: rgba(59, 106, 251, 0.7);
+              text {
+                color: #3b6afb;
+                font-weight: bold;
+              }
+            }
+          }
+          .input {
+            flex-grow: 1;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            justify-content: center;
+            input {
+              color: #6a6a77;
+              font-size: 24rpx;
+              text-align: center;
+            }
+          }
+        }
+      }
+    }
+    &.require {
+      padding: 20rpx 0;
+      // height: 40rpx;
+      // align-items: center;
+      .title,
+      .dian {
+        height: 68rpx;
+        line-height: 68rpx;
+      }
+      .jobCity {
+        display: flex;
+        flex-direction: column;
+        .desc {
+          display: inline-block;
+          margin-top: 20rpx;
+          font-size: 24rpx;
+          color: #9ea4af;
+          letter-spacing: 0.17rpx;
+        }
+        .types {
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          flex-grow: 1;
+          .option {
+            flex: 1;
+            padding: 0 82rpx;
+            margin-right: 12rpx;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            // flex-direction: column;
+            // justify-content: center;
+            &.selected {
+              background: rgba(59, 106, 251, 0.08);
+              border-color: rgba(59, 106, 251, 0.7);
+              text {
+                color: #3b6afb;
+                font-weight: bold;
+              }
+            }
+            &:last-child {
+              margin: 0;
+            }
+            .name {
+              font-size: 24rpx;
+              color: #4a4a53;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>

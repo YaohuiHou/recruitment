@@ -1,0 +1,10 @@
+
+  <view class="about _a20847a">
+    <block  wx:for="{{about[type]}}" wx:key="{{index}}" class="_a20847a">
+      <view class="item _a20847a">
+      <!-- <text class="title"><text class="icon"></text><text class="text">问</text>{{item.title}}</text> -->
+      <view class="title _a20847a"><view class="left _a20847a"><text class="icon iTitle _a20847a"/><text class="text _a20847a">问</text></view><view class="ctx _a20847a">{{item.title}}</view></view>
+      <view class="desc _a20847a"><view class="left _a20847a"><text class="icon iDesc _a20847a"/><text class="text _a20847a">答</text></view><view class="ctx _a20847a">{{item.content}}</view></view>
+    </view>
+    </block>
+  </view>

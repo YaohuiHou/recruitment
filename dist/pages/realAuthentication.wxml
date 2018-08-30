@@ -1,0 +1,185 @@
+
+  <view class="container _fa7b3b8">
+    <block  wx:if="{{authStatus == 0}}" class="_fa7b3b8">
+      <view class="header _fa7b3b8">
+        <text class="_fa7b3b8">您目前未进行实名认证</text>
+        <text class="_fa7b3b8">实名认证，增加您的职位或简历可信度！</text>
+        <text class="_fa7b3b8">完成下面操作，提交认证</text>
+
+
+      </view>
+      <view class="content _fa7b3b8">
+        <view class="changeBtn _fa7b3b8">
+          <view class="btn _fa7b3b8">
+            <block data-index="index" class="_fa7b3b8" wx:for="{{btnType}}" wx:for-index="index" wx:for-item="item" wx:key="index">
+              <view class="{{item.className}} _fa7b3b8" data-index="{{index}}" bindtap="changeBtn">{{item.name}}</view>
+            </block>
+          </view>
+        </view>
+        <!-- 个人 -->
+        
+  <view class="_7d32c7e _fa7b3b8" hidden="{{!personal}}">
+    <view class="inputItem _7d32c7e">
+      <view class="_7d32c7e">
+        <text class="label _7d32c7e">姓名</text>
+        <text class="dian _7d32c7e">:</text>
+        <input type="text" value="{{$personalCertificate$submitParams[1].personalName}}" data-type="personalName" bindinput="$personalCertificate$inputTextFun" placeholder="请输入您的真实姓名" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;" class="_7d32c7e"/>
+      </view>
+    </view>
+    <view class="inputItem _7d32c7e">
+      <view class="_7d32c7e">
+        <text class="label _7d32c7e">性别</text>
+        <text class="dian _7d32c7e">:</text>
+        <block data-index="index" class="_7d32c7e" wx:for="{{$personalCertificate$sex}}" wx:for-index="$personalCertificate$index" wx:for-item="$personalCertificate$item" wx:key="$personalCertificate$index">
+          <text class="sex {{$personalCertificate$item.className}} _7d32c7e" data-index="{{$personalCertificate$index}}" data-sex="{{$personalCertificate$item.label}}" bindtap="$personalCertificate$sexChange">{{$personalCertificate$item.label}}</text>
+        </block>
+      </view>
+    </view>
+    <view class="inputItem _7d32c7e">
+      <view class="_7d32c7e">
+        <text class="label _7d32c7e">证件号</text>
+        <text class="dian _7d32c7e">:</text>
+        <input type="idcard" maxlength="18" value="{{$personalCertificate$submitParams[1].personalIdentityNumber}}" data-type="personalIdentityNumber" bindinput="$personalCertificate$inputTextFun" placeholder="请输入您的有效身份证件号" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;" class="_7d32c7e"/>
+      </view>
+    </view>
+    <view class="uploadID _7d32c7e">
+      <text class="title _7d32c7e">点击上传手持身份证正面合影照片</text>
+      <view class="examples _7d32c7e">
+        <view class="left uploadArea _7d32c7e" data-select="personalPhoto" bindtap="$personalCertificate$chooseImage">
+            <image class="imageBg _7d32c7e" mode="aspectFit" src="{{$personalCertificate$submitParams[1].personalPhoto ? $personalCertificate$submitParams[1].personalPhoto : $personalCertificate$showData.personalPhoto}}"/>
+            <text class="addImage _7d32c7e"/>
+        </view>
+        <view class="right _7d32c7e">
+          <view class="_7d32c7e">
+            <view class="biao _7d32c7e"/>
+            <text class="_7d32c7e">五官清晰</text>
+          </view>
+          <view class="_7d32c7e">
+            <view class="biao _7d32c7e"/>
+            <text class="_7d32c7e">身份证信息清晰可见</text>
+          </view>
+          <view class="_7d32c7e">
+            <view class="biao _7d32c7e"/>
+            <text class="_7d32c7e">完整露出双手双肘</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+        <!-- 企业 -->
+        
+  <view class="_1c82863 _fa7b3b8" hidden="{{personal}}">
+    <view class="QinputItem _1c82863">
+      <view class="_1c82863">
+        <text class="label _1c82863">营业执照名称</text>
+        <text class="dian _1c82863">:</text>
+        <input type="text" value="{{$enterpriseCertification$QsubmitParams[2].companyBusinessLicenseName}}" data-name="companyBusinessLicenseName" bindinput="$enterpriseCertification$inputTextFun" placeholder="请输入营业执照名称" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;" class="_1c82863"/>
+      </view>
+    </view>
+    <view class="QinputItem _1c82863">
+      <view class="_1c82863">
+        <text class="label _1c82863">社会信用代码</text>
+        <text class="dian _1c82863">:</text>
+        <input type="text" value="{{$enterpriseCertification$QsubmitParams[2].companySocialCreditCode}}" data-name="companySocialCreditCode" bindinput="$enterpriseCertification$inputTextFun" placeholder="请输入统一社会信用代码" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;" class="_1c82863"/>
+      </view>
+    </view>
+    <view class="uploadID _1c82863">
+      <view class="item _1c82863">
+        <text class="title _1c82863">企业营业执照副本照片或扫描图片</text>
+      <text class="desc _1c82863">请确保证件<text class="_1c82863">完整，编号，文字，照片</text>均清晰可见</text>
+      <view class="uploadArea _1c82863" data-select="companyBusinessLicensePhoto" bindtap="$enterpriseCertification$chooseImage">
+        <image class="imageBg _1c82863" mode="aspectFit" src="{{$enterpriseCertification$QsubmitParams[2].companyBusinessLicensePhoto ? $enterpriseCertification$QsubmitParams[2].companyBusinessLicensePhoto : $enterpriseCertification$showData.companyBusinessLicensePhoto}}"/>
+        <text class="addImage _1c82863"/>
+      </view>
+      </view>
+    </view>
+    <view class="QinputItem _1c82863">
+      <view class="_1c82863">
+        <text class="label _1c82863">法定代表人姓名</text>
+        <text class="dian _1c82863">:</text>
+        <input type="text" value="{{$enterpriseCertification$QsubmitParams[2].companyLegalPersonName}}" data-name="companyLegalPersonName" bindinput="$enterpriseCertification$inputTextFun" placeholder="请输入法定代表人姓名" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;" class="_1c82863"/>
+      </view>
+    </view>
+    <view class="uploadID _1c82863">
+      <text class="title _1c82863">上传法人代表身份证正反面照片或扫描图</text>
+      <text class="desc _1c82863">请确保您的二代身份证处于有效期内</text>
+      <view class="bUpId _1c82863">
+        <view class="uploadArea _1c82863" data-select="companyLegalPersonIdphotoPositive" bindtap="$enterpriseCertification$chooseImage">
+          <image class="imageBg _1c82863" mode="aspectFit" src="{{$enterpriseCertification$QsubmitParams[2].companyLegalPersonIdphotoPositive ? $enterpriseCertification$QsubmitParams[2].companyLegalPersonIdphotoPositive : $enterpriseCertification$showData.companyLegalPersonIdphotoPositive}}"/>
+          <text class="addImage _1c82863"/>
+        </view>
+        <view class="uploadArea _1c82863" data-select="companyLegalPersonIdphotoNegative" bindtap="$enterpriseCertification$chooseImage">
+          <image class="imageBg _1c82863" mode="aspectFit" src="{{$enterpriseCertification$QsubmitParams[2].companyLegalPersonIdphotoNegative ? $enterpriseCertification$QsubmitParams[2].companyLegalPersonIdphotoNegative : $enterpriseCertification$showData.companyLegalPersonIdphotoNegative}}"/>
+          <text class="addImage _1c82863"/>
+        </view>
+      </view>
+    </view>
+  </view>
+      </view>
+      <view class="footer _fa7b3b8">
+        <view bindtap="gotoLink" class="_fa7b3b8">放弃认证</view>
+        <view class="{{canSubmit ? 'canSubmitAuthor' : 'noCanubmitAuthor' }} _fa7b3b8" bindtap="submit">提交认证</view>
+      </view>
+    </block>
+    <block  wx:if="{{authStatus != 0}}" class="_fa7b3b8">
+      
+  <view class="authStatus _fa7b3b8">
+    <block  wx:if="{{$authStatus$authStatus == 1}}">
+      <view class="submintEd">
+        <text class="icon"/>
+        <text class="status">您的认证信息已提交</text>
+        <text class="desc">预计2个工作日内完成审核，请耐心等待。</text>
+      </view>
+    </block>
+    <block  wx:if="{{$authStatus$authStatus == '-1'}}">
+      <view class="submintFail">
+        <text class="icon"/>
+        <text class="status">抱歉，您的认证信息未能通过审核</text>
+        <text class="desc">{{$authStatus$reviewReason}}</text>
+        <view class="modifyInfo" bindtap="$authStatus$changeInfo">修改认证信息</view>
+      </view>
+    </block>
+    <block wx:if="{{$authStatus$authStatus == 2}}">
+      <view class="submintSuccess">
+        <text class="icon"/>
+        <text class="status">已完成实名认证，请勿发布虚假信息!</text>
+        <!-- <view class="modifyInfo">注销认证信息</view> -->
+      </view>
+    </block>
+  </view>
+
+    </block>
+    
+  <view class="popup {{$popup$info.show ? '' : 'popupHidden'}} _d2ffeb6 _fa7b3b8" bindtap="$popup$hidePopup">
+    <block  wx:if="{{$popup$info.type == 'notice'}}" class="_d2ffeb6">
+      <view class="container _d2ffeb6">
+        <text class="title _d2ffeb6">{{$popup$info.title}}</text>
+        <text class="desc _d2ffeb6">{{$popup$info.desc}}</text>
+        <view class="options _d2ffeb6">
+          <text class="cancal _d2ffeb6" bindtap="$popup$cancal">取消</text>
+          <text class="sure _d2ffeb6" bindtap="$popup$sure">确认</text>
+        </view>
+      </view>
+    </block>
+    <block  wx:if="{{$popup$info.type == 'success'}}" class="_d2ffeb6">
+      <view class="container _d2ffeb6">
+        <text class="icon _d2ffeb6"/>
+        <text class="title _d2ffeb6">{{$popup$info.title}}</text>
+        <text class="desc _d2ffeb6">{{$popup$info.desc}}</text>
+        <view class="options _d2ffeb6">
+          <button class="share _d2ffeb6" id="shareBtn" data-productId="{{$popup$productId}}" open-type="share" type="primary" hover-class="other-button-hover"><text class="share _d2ffeb6" bindtap="$popup$share">转发需求到微信群</text></button>
+        </view>
+      </view>
+    </block>
+    <block  wx:if="{{$popup$info.type == 'tel'}}" class="_d2ffeb6">
+      <view class="container _d2ffeb6" catchtap="$popup$stop">
+        <image src="https://bbs.cehome.com/wxApp/jobResume/imgs/phone.svg" class="_d2ffeb6"/>
+        <!-- <text class="icon tel"></text> -->
+        <text class="title _d2ffeb6">好工作不等人，赶紧电话联系吧~</text>
+        <input type="tel" maxlength="11" value="{{$popup$telValue}}" bindinput="$popup$change" placeholder="请输入手机号" placeholder-style="font-size: 26rpx;color:#9ea4af;letter-spacing: 0.35rpx;" class="_d2ffeb6"/>
+        <view class="callPhone {{$popup$telValue.length > 0 ? 'active' : 'preActive'}} _d2ffeb6" bindtap="$popup$callPhone"><text class="callPhoneText _d2ffeb6">免费通话</text></view>
+      </view>
+    </block>
+
+  </view>
+  </view>

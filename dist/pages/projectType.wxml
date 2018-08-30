@@ -1,0 +1,9 @@
+
+  <view class="engContent">
+    <view class="label">
+      <view  wx:for="{{quantityList}}" wx:key="{{index}}">
+        <text data-index="{{index}}" data-id="{{item.k}}" data-name="{{item.v}}" bindtap="chooseCompany" class="{{ item.select ? 'active' : ''}}">{{item.v}}</text>
+      </view>
+      </view>
+    <view class="btn" bindtap="sure"><text>确认</text></view>
+  </view>

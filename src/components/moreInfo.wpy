@@ -1,0 +1,498 @@
+<template>
+  <view class="item">
+    <view class="li require" wx:if="{{handleType}}">
+      <text class="title">操作方向</text>
+      <text class="dian">:</text>
+      <view class="types">
+        <view wx:for="{{handle}}" @tap="selectFun('handle','{{index}}')" class="option {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+            <text class="name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="li change-li" @tap="gotoLink">
+      <text class="title">工程类型</text>
+      <text class="dian">:</text>
+      <view class="citys">
+        <text class="city">{{worksRelation}}</text>
+        <text class="right"></text>
+      </view>
+    </view>
+    <block wx:if="{{pageType != 'resume'}}">
+      <view class="li require">
+        <text class="title">工作时间</text>
+        <text class="dian">:</text>
+        <view class="types">
+          <view wx:for="{{timer}}" @tap="selectFun('timer','{{index}}')" class="option {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+              <text class="name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    <view class="li job-num">
+      <text class="title">招聘人数</text>
+      <text class="dian">:</text>
+      <view class="types">
+        <view class="remove icon {{jobNum <= 1 ? 'notext' : ''}}" @tap="removeFun">减</view>
+        <view class="number">{{jobNum}}</view>
+        <view class="add icon" @tap="addFun">加</view>
+      </view>
+      </view>
+    </block>
+    <view class="li textarea-li">
+      <text class="title">{{pageType != 'resume' ? '经验要求' : '更多经验'}}</text>
+      <text class="dian">:</text>
+      <view class="textarea">
+        <textarea
+          bindinput="textInput"
+          data-type="{{ pageType != 'resume' ? 'jobRequire':'workExperience'}}"
+          placeholder="例如：可修边坡，装土要快，挖沟要直~"
+          value="{{pageType != 'resume' ? jobRequire : workExperience}}"
+          maxlength="100"
+        ></textarea>
+      </view>
+    </view>
+    <view class="li textarea-li">
+      <text class="title">{{pageType != 'resume' ? '其他福利' : '其他要求'}}</text>
+      <text class="dian">:</text>
+      <view class="textarea">
+        <textarea
+          bindinput="textInput"
+          data-type="{{ pageType != 'resume' ? 'otherWelfare':'askFor'}}"
+          placeholder="{{pageType != 'resume' ? '例如：过节有红包~' : '你不写老板怎么知道你想要啥'}}"
+          value="{{pageType != 'resume' ? otherWelfare : askFor}}"
+          maxlength="100"
+        ></textarea>
+      </view>
+    </view>
+    <block wx:if="{{pageType != 'resume'}}">
+      <view class="li">
+        <text class="title">工作环境</text>
+        <text class="dian">:</text>
+        <text class="desc">上传工作环境和设备照片,给求职者更多参考</text>
+      </view>
+      <uploadPic
+        :type.sync="pageType"
+        :imagePaths.sync="imagePaths"
+      ></uploadPic>
+    </block>
+    <block wx:if="{{pageType == 'resume'}}">
+      <view class="li video">
+        <view class="videoItem">
+          <text class="title">工作视频</text>
+          <text class="dian">:</text>
+        </view>
+        <text class="desc">上传操作视频更容易找到工作哦，最多可传6个，每个最长1分钟</text>
+      </view>
+      <uploadPic
+        :type.sync="pageType"
+        :imagePaths.sync="imagePaths"
+        :videoPaths.sync="videoPaths"
+      ></uploadPic>
+    </block>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy'
+import uploadPic from '../components/uploadPic'
+
+export default class Index extends wepy.component {
+  components = {
+    uploadPic
+  }
+
+  props = {
+    item: {},
+    worksRelation: {},
+    pageType: {
+      twoWay: true
+    },
+    editorDataObject: {
+      twoWay: true
+    },
+    submitData: {
+      twoWay: true
+    },
+    submitFunDisabled: {
+      twoWay: true
+    }
+  }
+
+  data = {
+    // 挖机关联
+    handleType: false,
+    imagePaths: [],
+    videoPaths: [],
+    // 信息填写
+    otherWelfare: '',
+    jobRequire: '',
+    askFor: '',
+    workExperience: '',
+    jobNum: 1,
+    handle: [
+      {
+        name: '不限',
+        select: false,
+        type: 'operationDirection',
+        value: 1
+      },
+      {
+        name: '正手',
+        select: false,
+        type: 'operationDirection',
+        value: 2
+      },
+      {
+        name: '反手',
+        select: false,
+        type: 'operationDirection',
+        value: 3
+      }
+    ],
+    timer: [
+      {
+        name: '白班',
+        select: false,
+        type: 'shiftType',
+        value: 1
+      },
+      {
+        name: '夜班',
+        select: false,
+        type: 'shiftType',
+        value: 2
+      },
+      {
+        name: '两班倒',
+        select: false,
+        type: 'shiftType',
+        value: 3
+      }
+    ]
+  }
+  onLoad() {}
+
+  events = {
+    // 上传图片
+    upimages(type, urls) {
+      this.$emit('editorData', 'sitePhoto', urls.join(','))
+    },
+    upVideos(video, imgArr) {
+      // 视频和缩略图
+      this.$emit('editorData', 'videoPaths', video.join(','))
+      this.$emit('editorData', 'videoThumbPaths', imgArr.join(','))
+    },
+    // 上传是否完成
+    submitDisabledFun(what) {
+      this.submitFunDisabled = what
+      this.$apply()
+    }
+  }
+
+  watch = {
+    // jobNum(newVal, oldVal) {
+    //   this.$emit('editorData', 'humanCount', newVal)
+    // },
+    editorDataObject() {
+      // 添加详情数据
+      this.newEditorData()
+    },
+    submitData() {
+      // 挖机关联项
+      if (this.submitData.driverType < 5) {
+        this.handleType = true
+        this.handle.forEach((element, i) => {
+          if (element.select) {
+            this.$emit('editorData', element.type, element.value)
+          }
+        })
+        if (this.editorDataObject && this.editorDataObject.operationDirection) {
+          this.$emit(
+            'editorData',
+            'operationDirection',
+            this.editorDataObject.operationDirection
+          )
+        }
+        this.$apply()
+      } else {
+        this.handleType = false
+        this.$emit('editorData', 'operationDirection', '')
+        this.$apply()
+      }
+    }
+  }
+  methods = {
+    // 点击选中
+    selectFun(type, index) {
+      this[type].forEach((element, i) => {
+        element.select = false
+        if (i === index) {
+          element.select = true
+          this.$emit('editorData', element.type, element.value)
+        }
+      })
+    },
+    // 输入
+    textInput(e) {
+      let content = e.detail.value
+      let type = e.target.dataset.type
+      this[type] = content
+      this.$apply()
+      this.$emit('editorData', type, content)
+    },
+    // 加
+    addFun() {
+      this.jobNum++
+      this.$apply()
+      this.$emit('editorData', 'humanCount', this.jobNum)
+    },
+    // 减
+    removeFun() {
+      if (this.jobNum > 1) {
+        this.jobNum--
+        this.$apply()
+        this.$emit('editorData', 'humanCount', this.jobNum)
+      }
+    },
+    gotoLink() {
+      wepy.navigateTo({
+        url: `/pages/projectType`
+      })
+    }
+  }
+
+  // 编辑数据
+  newEditorData() {
+    // 操作方向
+    this.editorDataObject.operationDirection &&
+      (this.handle[this.editorDataObject.operationDirection - 1].select = true)
+
+    // // 上班时间
+    this.editorDataObject.shiftType &&
+      (this.timer[this.editorDataObject.shiftType - 1].select = true)
+
+    // // 工程类型
+    this.worksRelation = this.editorDataObject.worksRelationStr
+    if (this.worksRelation) {
+      let key = this.editorDataObject.worksRelation.split(',')
+      let value = this.editorDataObject.worksRelationStr.split(',')
+      let arr = []
+      key.forEach((item, index) => {
+        let obj = {}
+        obj.key = item
+        obj.value = value[index]
+        arr.push(obj)
+      })
+      wx.setStorage({
+        key: 'worksRelation',
+        data: JSON.stringify(arr)
+      })
+    }
+
+    // 视频
+    if (this.editorDataObject.videoFlag == 2) {
+      let videoArr = []
+      let imgArr = []
+      this.editorDataObject.videoList.forEach((element, i) => {
+        videoArr[i] = element.videoPath
+        imgArr[i] = element.videoThumb ? element.videoThumb : ''
+      })
+      this.videoPaths = videoArr
+      setTimeout(() => {
+        this.imagePaths = imgArr
+        this.$apply()
+      }, 500)
+    }
+    if (
+      this.editorDataObject.sitePhotoList &&
+      this.editorDataObject.sitePhotoList.length > 0
+    ) {
+      // 图片
+      this.imagePaths = this.editorDataObject.sitePhotoList
+    }
+    // 填写文案
+    this.otherWelfare = this.editorDataObject.otherWelfare
+    this.jobRequire = this.editorDataObject.jobRequire
+    this.askFor = this.editorDataObject.askFor
+    this.workExperience = this.editorDataObject.workExperience
+
+    // 招聘人数
+    if (this.editorDataObject.humanCount) {
+      this.jobNum = this.editorDataObject.humanCount
+    }
+
+    this.$apply()
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  padding-top: 20rpx;
+  .video {
+    margin-bottom: 40rpx;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    .videoItem {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      padding-bottom: 20rpx;
+      justify-content: flex-start;
+      .title {
+        text-align: left;
+        display: inline-block;
+      }
+    }
+    .title:before {
+      display: none;
+    }
+
+    .desc {
+      font-size: 26rpx;
+      color: #9ea4af;
+      letter-spacing: 0.19rpx;
+    }
+  }
+  .li {
+    margin-bottom: 40rpx;
+    display: flex;
+    align-items: center;
+    .title:before {
+      display: none;
+    }
+    &.textarea-li {
+      align-items: flex-start;
+      .title {
+        line-height: 68rpx;
+        height: 68rpx;
+      }
+      .dian {
+        line-height: 68rpx;
+      }
+    }
+    .desc {
+      font-size: 26rpx;
+      color: #9ea4af;
+      letter-spacing: 0.19rpx;
+    }
+    .textarea {
+      border: 1rpx solid rgba(189, 193, 201, 0.7);
+      border-radius: 4rpx;
+      width: 100%;
+      height: 160rpx;
+      padding: 16rpx 20rpx;
+      box-sizing: border-box;
+      textarea {
+        width: 100%;
+        height: 100%;
+        font-size: 24rpx;
+      }
+    }
+    &.require {
+      .types {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-grow: 1;
+        .option {
+          flex: 1;
+          margin-right: 12rpx;
+          border: 1rpx solid rgba(189, 193, 201, 0.7);
+          border-radius: 4rpx;
+          height: 68rpx;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          justify-content: center;
+          &.selected {
+            background: rgba(59, 106, 251, 0.08);
+            border-color: rgba(59, 106, 251, 0.7);
+            text {
+              color: #3b6afb;
+              font-weight: bold;
+            }
+          }
+          &:last-child {
+            margin: 0;
+          }
+          .name {
+            font-size: 24rpx;
+            color: #4a4a53;
+          }
+        }
+      }
+    }
+    &.change-li {
+      border-bottom: 1rpx solid rgba(220, 226, 238, 0.6);
+      border-top: 1rpx solid rgba(220, 226, 238, 0.6);
+      padding: 26rpx 0;
+      .title {
+        line-height: 40rpx;
+        &:before {
+          line-height: 40rpx;
+        }
+      }
+      .citys {
+        display: flex;
+        justify-content: space-between;
+        flex-grow: 1;
+        align-items: center;
+        text {
+          font-size: 32rpx;
+          color: #4a4a53;
+          line-height: 40rpx;
+        }
+        .right {
+          display: block;
+          transform: rotate(45deg);
+          border-top: 3rpx solid #bdc1c9;
+          border-right: 3rpx solid #bdc1c9;
+          width: 14rpx;
+          height: 14rpx;
+        }
+      }
+    }
+    &.job-num {
+      .types {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-grow: 1;
+        view {
+          border-radius: 4rpx;
+          border: 1rpx solid rgba(189, 193, 201, 0.7);
+          margin-right: 12rpx;
+          &:last-child {
+            margin: 0;
+          }
+        }
+        .number {
+          flex-grow: 1;
+          height: 68rpx;
+          line-height: 68rpx;
+          text-align: center;
+          color: #3b69fb;
+          font-size: 28rpx;
+          font-weight: bold;
+        }
+        .icon {
+          font-family: 'TieJia';
+          width: 68rpx;
+          height: 68rpx;
+          flex-grow: 0;
+          line-height: 68rpx;
+          text-align: center;
+          color: #4a4a53;
+          font-size: 32rpx;
+          &.notext {
+            color: #999;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

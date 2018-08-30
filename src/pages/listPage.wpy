@@ -1,0 +1,195 @@
+<template>
+  <view class="listPage">
+    <scroll-view class="content" scroll-y bindscrolltolower="onBottom">
+    <repeat wx:for="{{listData}}" wx:for-index="itemIndex" wx:key="itemIndex" wx:for-item="itemLi">
+      <block wx:if="{{mapType == 'job'}}">
+        <jobListItem :item.sync="itemLi" :page.sync="page"></jobListItem>
+      </block>
+      <block wx:if="{{mapType == 'resume'}}">
+        <resumeListItem :item.sync="itemLi" :page.sync="page"></resumeListItem>
+      </block>
+    </repeat>
+    <block wx:if="{{!isData}}">
+      <nothing :isDataDesc.sync="isDataDesc"></nothing>
+    </block>
+    <text wx:if="{{listData.length>0}}" class="loading">{{loadingMsg}}</text>
+
+    </scroll-view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import jobListItem from '../components/jobListItem';
+import nothing from '../components/nothing';
+import resumeListItem from '../components/resumeListItem';
+import request from '../common/request.js';
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: ''
+  };
+  components = {
+    jobListItem,
+    resumeListItem,
+    nothing
+  };
+
+  data = {
+    mapType: 'job', //控制显示图标  page 值 分别为job、resume
+    page: 'mapList',
+    pageNo: 1,
+    listData: [],
+    totalRecord: '',
+    loadingMsg: '',
+    params: {},
+    isData: true,
+    isDataDesc: ''
+  };
+  watch = {};
+  methods = {
+    onBottom() {
+      this.pageNo++;
+      if (this.listData.length < this.totalRecord) {
+        this.loadingMsg = '正在拼命加载中...';
+        this.$apply();
+        this.getListData('onBottom');
+      }
+    }
+  };
+
+  events = {};
+  onShow() {}
+  onLoad(options) {
+    this.$parent.methods.showLoading('正在拼命加载中...');
+    this.mapType = options.mapType;
+    let title = '';
+    let city = unescape(options.city).split('&')[0];
+    let cityCode = unescape(options.city).split('&')[1];
+    // .substring(0, 4) + '0';
+    if (options.mapType && options.mapType == 'job') {
+      title = `${city} · 职位`;
+    } else if (options.mapType && options.mapType == 'resume') {
+      title = `${city} · 简历`;
+    }
+    wx.setNavigationBarTitle({
+      title: title
+    });
+    wx.getStorage({
+      key: 'listParams',
+      complete: async res => {
+        if (res.data) {
+          var params = JSON.parse(res.data);
+          this.params = params;
+          this.params['areaCode'] = cityCode;
+          this.$apply();
+          this.getListData();
+        }
+      }
+    });
+  }
+  getListData(option) {
+    let url =
+      this.mapType == 'job'
+        ? request.Api.hiringDriverList()
+        : request.Api.resumeList();
+    this.params['pageIndex'] = this.pageNo;
+    this.params['pageSize'] = 10;
+
+    request
+      .cehomeRequest(url, this.params, 'GET')
+      .then(res => {
+        if (res.statusCode === 200 && res.data.ret == 0) {
+          this.totalRecord = res.data.data.totalRecord;
+
+          if (res.data.data.datas.length < 10) {
+            this.loadingMsg = '没有更多数据了';
+          } else {
+            this.loadingMsg = '上拉加载更多';
+          }
+
+          // 处理返回数据中moreWelfare 或 为数组
+          var newArray = res.data.data.datas.map((item, i) => {
+            if (this.mapType == 'job') {
+              return {
+                ...item,
+                moreWelfare: item.moreWelfare.split(',')
+              };
+            } else if (this.mapType == 'resume') {
+              return {
+                ...item,
+                worksRelationList: item.worksRelationList.split(',')
+              };
+            }
+          });
+          if (option == 'onBottom') {
+            this.listData = [...this.listData, ...newArray];
+          } else {
+            this.listData = newArray;
+          }
+          if (res.data.data.datas.length == 0 && this.totalRecord <= 0) {
+            this.isData = false;
+            this.isDataDesc = '没有找到任何信息';
+          }
+
+          this.$apply();
+        } else {
+          this.isData = false;
+          this.isDataDesc = res.data.msg;
+          // this.$parent.methods.showToast('请求失败~');
+        }
+        this.$apply();
+        this.$parent.methods.hideLoading();
+      })
+      .catch(err => {
+        if (err.errMsg == 'request:fail timeout') {
+          this.$parent.methods.showToast('网络请求超时~');
+        } else {
+          this.$parent.methods.showToast('网络好像有问题，请检查网络~');
+        }
+      });
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.listPage {
+  height: 100%;
+  .content {
+    position: relative;
+    height: 100vh;
+    background-color: #f3f3f3;
+    .loading {
+      height: 64rpx;
+      display: block;
+      line-height: 64rpx;
+      text-align: center;
+      font-size: 28rpx;
+      color: #888;
+      background: #f3f3f3;
+      // padding-bottom: 100rpx;
+    }
+    .li {
+      margin-top: 20rpx;
+    }
+  }
+}
+.nothing {
+  height: 340rpx;
+  display: block;
+  margin: 100rpx auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  image {
+    width: 288rpx;
+    height: 288rpx;
+    margin: 0 auto;
+  }
+  text {
+    margin-top: 30rpx;
+    color: #888;
+    font-size: 28rpx;
+  }
+}
+</style>

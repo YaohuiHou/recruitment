@@ -1,0 +1,473 @@
+<template>
+  <view class="container">
+    <block wx:if="{{authStatus == 0}}">
+      <view class="header">
+        <text>您目前未进行实名认证</text>
+        <text>实名认证，增加您的职位或简历可信度！</text>
+        <text>完成下面操作，提交认证</text>
+
+
+      </view>
+      <view class="content">
+        <view class="changeBtn">
+          <view class="btn">
+            <repeat for="{{btnType}}" key="index" data-index="index" item="item">
+              <view class="{{item.className}}" data-index="{{index}}" @tap="changeBtn">{{item.name}}</view>
+            </repeat>
+          </view>
+        </view>
+        <!-- 个人 -->
+        <personalCertificate
+          hidden="{{!personal}}"
+          :submitParams.sync="submitData"
+          :showData.sync="submitParams"
+        ></personalCertificate>
+        <!-- 企业 -->
+        <enterpriseCertification
+          hidden="{{personal}}"
+          :QsubmitParams.sync="submitData"
+          :showData.sync="QsubmitParams"
+        ></enterpriseCertification>
+      </view>
+      <view class="footer">
+        <view @tap="gotoLink">放弃认证</view>
+        <view class="{{canSubmit ? 'canSubmitAuthor' : 'noCanubmitAuthor' }}" @tap="submit">提交认证</view>
+      </view>
+    </block>
+    <block wx:if="{{authStatus != 0}}">
+      <authStatus :authStatus.sync="authStatus" :reviewReason.sync="reviewReason"></authStatus>
+    </block>
+    <popup :info.sync="popupInfo"></popup>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import API from '../common/api.js'
+import { connect } from 'wepy-redux'
+import { LOGIN_SUCCESS, LOGIN_FAIL, LOGIN_START } from '../store/types/index'
+import { login } from '../store/actions'
+import { isEmojiCharacter, isID, tyshyxdm } from '../utils/utils.js'
+import authStatus from '../components/authStatus'
+import popup from '../components/popup'
+import personalCertificate from '../components/personalCertificate'
+import enterpriseCertification from '../components/enterpriseCertification'
+import request from '../common/request.js'
+@connect(
+  {
+    state(state) {
+      return state
+    }
+  },
+  {
+    login,
+    loginStart: LOGIN_START
+  }
+)
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '实名认证'
+  }
+  components = {
+    popup,
+    authStatus,
+    personalCertificate,
+    enterpriseCertification
+  }
+
+  data = {
+    // 未通过审核提示语
+    reviewReason: '',
+    // 弹窗组件
+    popupInfo: {},
+    authStatus: 0,
+    btnType: [
+      { className: 'active', name: '个人', value: 1 },
+      { className: '', name: '企业', value: 2 }
+    ],
+    submitParams: {
+      personal: true,
+      fullName: '',
+      sex: '男',
+      certificatesNumber: '',
+      certificatesImage: '',
+      // 个人证件
+      personalPhoto: '../images/man.jpg'
+    },
+    QsubmitParams: {
+      Qpersonal: true,
+      companyBusinessLicenseName: '', //	企业认证-营业执照名称	string	当legalizeType=2时，此项为必填项
+      companyBusinessLicensePhoto:
+        'https://bbs.cehome.com/wxApp/jobResume/imgs/bg3.png', //	企业认证-营业执照图片	string	当legalizeType=2时，此项为必填项
+      companyLegalPersonIdphotoNegative:
+        'https://bbs.cehome.com/wxApp/jobResume/imgs/bg2.png', //	企业认证-法人身份证背面	string	当legalizeType=2时，此项为必填项
+      companyLegalPersonIdphotoPositive:
+        'https://bbs.cehome.com/wxApp/jobResume/imgs/bg1.png', //	企业认证-法人身份证正面	string	当legalizeType=2时，此项为必填项
+      companyLegalPersonName: '', //	企业认证-法人姓名	string	当legalizeType=2时，此项为必填项
+      companySocialCreditCode: '' //	社会信用代码	string	当legalizeType=2时，此项为必填项
+    },
+    canSubmit: false, //当资料个人认证填写完毕时为true 可提交
+    personal: true, //是否个人认证
+    // 提交
+    submitData: {
+      1: {
+        personalIdentityNumber: '', //	个人认证 身份证号	string	当legalizeType=1时，此项为必填项
+        personalName: '', //	个人认证-姓名	string	当legalizeType=1时，此项为必填项
+        personalPhoto: '', //	个人认证合影	string	当legalizeType=1时，此项为必填项
+        personalSex: 1 //	个人认证性别	number	字典：1：男；2：女；当legalizeType=1时，此项为必填项
+      },
+      2: {
+        companyBusinessLicenseName: '', //	企业认证-营业执照名称	string	当legalizeType=2时，此项为必填项
+        companyBusinessLicensePhoto: '', //	企业认证-营业执照图片	string	当legalizeType=2时，此项为必填项
+        companyLegalPersonIdphotoNegative: '', //	企业认证-法人身份证背面	string	当legalizeType=2时，此项为必填项
+        companyLegalPersonIdphotoPositive: '', //	企业认证-法人身份证正面	string	当legalizeType=2时，此项为必填项
+        companyLegalPersonName: '', //	企业认证-法人姓名	string	当legalizeType=2时，此项为必填项
+        companySocialCreditCode: '' //	社会信用代码	string	当legalizeType=2时，此项为必填项
+      },
+      globle: {
+        uid: '',
+        userName: '',
+        mobile: '',
+        legalizeType: 1 // 1 个人 2 企业
+      }
+    }
+  }
+
+  // imageType = function(select, tempFilePaths) {
+  //   switch (select) {
+  //     case 'personalPhoto':
+  //       this.submitParams.certificatesImage = tempFilePaths
+  //       break
+  //     case 'companyBusinessLicensePhoto':
+  //       this.QsubmitParams.licenseImage = tempFilePaths
+  //       break
+  //     case 'companyLegalPersonIdphotoPositive':
+  //       this.QsubmitParams.certificatesImagePositive = tempFilePaths
+  //       break
+  //     case 'companyLegalPersonIdphotoNegative':
+  //       this.QsubmitParams.certificatesImageOtherSide = tempFilePaths
+  //       break
+  //     default:
+  //       break
+  //   }
+  //   this.$apply()
+  // }
+  methods = {
+    // 提交
+    submit() {
+      if (!this.canSubmit) return
+      // 验证
+      switch (Number(this.submitData.globle.legalizeType)) {
+        case 1:
+          if (
+            !isID(
+              this.submitData[this.submitData.globle.legalizeType]
+                .personalIdentityNumber
+            )
+          ) {
+            this.toastView('请输入正确的身份证号')
+            return
+          }
+          break
+
+        default:
+          if (
+            !tyshyxdm(
+              this.submitData[this.submitData.globle.legalizeType]
+                .companySocialCreditCode
+            )
+          ) {
+            this.toastView('请输入正确的社会信用代码')
+            return
+          }
+          break
+      }
+      if (this.submitDisable) return
+      this.submitDisable = true
+      let obj = {
+        ...this.submitData.globle,
+        ...this.submitData[this.submitData.globle.legalizeType]
+      }
+
+      request.cehomeRequest(request.Api.adrove(), obj, 'POST').then(res => {
+        this.submitDisable = false
+        if (res.data.ret === '0') {
+          let loginInfo = wx.getStorageSync('loginInfo')
+          wx.setStorageSync(
+            'loginInfo',
+            Object.assign(loginInfo, { auth: true })
+          )
+          this.authStatus = 1
+          this.$apply()
+          this.toastView('发布成功')
+        } else {
+          this.toastView(res.data.msg)
+        }
+      })
+    },
+    // 切换
+    changeBtn(e) {
+      var index = e.currentTarget.dataset.index
+
+      this.checkBoxFun(index)
+    },
+    // 返回
+    gotoLink() {
+      var popupParams = {
+        title: '温馨提示',
+        desc: '请确认要放弃认证吗？',
+        show: true,
+        type: 'notice', //弹窗类型 ‘notice 表示警示弹窗 ’success 表示成功
+        callback: res => {
+          if (res == 'success') {
+            // 返回
+            wx.navigateBack({
+              delta: 1
+            })
+          } else if (res == 'cancal') {
+          }
+        }
+      }
+      this.popupInfo = popupParams
+      this.$apply()
+    }
+  }
+
+  events = {
+    // 上传图片
+    chooseImage(n, select) {
+      wx.chooseImage({
+        count: 1, // 默认9
+        sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+        sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+        success: res => {
+          // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
+          var tempFilePaths = res.tempFilePaths[0]
+          // this.imageType(select, tempFilePaths)
+          wx.showLoading({
+            title: '正在上传图片'
+          })
+
+          wx.uploadFile({
+            url: request.Api.upImageFile(),
+            filePath: tempFilePaths,
+            header: request.getHeaderData(),
+            name: 'file',
+            complete: res => {
+              wx.hideLoading()
+              var data = JSON.parse(res.data)
+              if (data.ret == '0') {
+                // 保存
+                this.submitData[n][select] = data.data
+                this.buttonTypeFun(n)
+              } else {
+                wepy.showToast({
+                  icon: 'none',
+                  title: '网络问题，请重新上传~',
+                  duration: 1500
+                })
+              }
+            }
+          })
+        }
+      })
+    },
+    // 编辑提交数据
+    editorData(type, key, value) {
+      this.submitData[type][key] = value
+
+      this.buttonTypeFun(type)
+      this.$apply()
+    }
+  }
+  watch = {}
+  onLoad(option) {
+    // 当前审核状态
+    // if (option.type) {
+    //   this.authStatus = option.type
+    //   this.$apply()
+    // }
+    // 个人信息
+    this.submitData.globle.userName = this.state.login.userInfo.username
+    this.submitData.globle.uid = this.state.login.userInfo.uid
+    this.submitData.globle.mobile = this.state.login.userInfo.mobile
+
+    this.getInfo()
+    this.$apply()
+  }
+
+  // 切换 个人或企业
+  checkBoxFun(index) {
+    this.personal = index == 0 ? true : false
+    var btnType = this.btnType.map((item, i) => {
+      if (index == i) {
+        return {
+          ...item,
+          className: 'active'
+        }
+      } else {
+        return {
+          ...item,
+          className: ''
+        }
+      }
+    })
+    this.submitData.globle.legalizeType = this.btnType[index].value
+    this.btnType = btnType
+
+    this.buttonTypeFun(this.btnType[index].value)
+
+    this.$apply()
+  }
+
+  // 获取认证信息
+  getInfo() {
+    request
+      .cehomeRequest(request.Api.getUserAuthInfo(), {}, 'GET')
+      .then(res => {
+        if (res.data.ret === '0') {
+          // 审核状态
+          const data = res.data.data
+          let status = data.reviewStatus
+          switch (Number(status)) {
+            case 0:
+              // 未审核
+              this.authStatus = 1
+              break
+            case 1:
+              // 审核通过
+              this.authStatus = 2
+              break
+            case 2:
+              // 未通过
+              this.authStatus = '-1'
+              this.reviewReason = data.reviewReason
+              break
+          }
+
+          // 认证类型
+          let type = data.legalizeType
+          this.checkBoxFun(type - 1)
+
+          // globle
+          for (const key in this.submitData.globle) {
+            this.submitData.globle[key] = data[key]
+          }
+
+          // 认证类型
+          for (const keyType in this.submitData[type]) {
+            this.submitData[type][keyType] = data[keyType]
+          }
+          this.$apply()
+        }
+      })
+  }
+
+  // 底部按钮
+  buttonTypeFun(type) {
+    let isSubmit = true
+    for (const key in this.submitData[type]) {
+      if (this.submitData[type][key] === '') {
+        isSubmit = false
+      }
+    }
+    this.canSubmit = isSubmit
+    this.$apply()
+  }
+
+  // 弹窗提示
+  toastView(text) {
+    wx.showToast({
+      title: text,
+      icon: 'none',
+      duration: 1200
+    })
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.container {
+  .footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 96rpx;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    font-size: 32rpx;
+    color: #4a4a53;
+    letter-spacing: 0.28rpx;
+    text-align: center;
+    font-weight: bold;
+    z-index: 10;
+    view {
+      flex: 1;
+      height: 96rpx;
+      line-height: 96rpx;
+      text-align: center;
+      &.noCanubmitAuthor {
+        background: #dce2ee;
+        color: #ffffff;
+      }
+      &.canSubmitAuthor {
+        background: #3b6afb;
+        color: #ffffff;
+      }
+    }
+  }
+  .header {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    text {
+      color: #2d2d33;
+    }
+    :nth-child(1) {
+      padding: 24rpx 0;
+      font-size: 38rpx;
+      letter-spacing: 0.34rpx;
+      font-weight: bold;
+    }
+    :nth-child(2),
+    :nth-child(3) {
+      font-size: 30rpx;
+      letter-spacing: 0.27rpx;
+    }
+  }
+  .content {
+    width: 100%;
+    padding-top: 42rpx;
+    padding-bottom: 120rpx;
+    .changeBtn {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 54rpx;
+      .btn {
+        display: flex;
+        flex-direction: row;
+        width: 560rpx;
+        height: 90rpx;
+        align-items: center;
+        background: #ffffff;
+        box-shadow: 0 5rpx 28rpx 0 rgba(96, 100, 114, 0.18);
+        border-radius: 99rpx;
+        view {
+          flex: 1;
+          text-align: center;
+          &.active {
+            height: 90rpx;
+            line-height: 90rpx;
+            background: #3b6afb;
+            border-radius: 99rpx;
+            color: #ffffff;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

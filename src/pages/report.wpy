@@ -1,0 +1,194 @@
+<template>
+  <view class="report">
+    <view class="select">
+      <text class="title">请选择举报原因：</text>
+      <text wx:for="{{selesctItem}}" item="item" class="reportItem {{item.selected ? 'selectActive' : 'selectW'}}" wx:key="index" @tap="selectFun('{{index}}','{{item.k}}')">{{item.v}}</text>
+    </view>
+    <textarea bindinput="valueChange" value="{{values}}" placeholder="请填写举报原因，最多500字..." maxlength="500" placeholder-style="font-size: 26rpx;color:#9ea4af;letter-spacing: 0.35rpx;"/>
+    <view class="roportBtn" @tap="requestReport"><text>提交</text></view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import LoginMode from '../components/LoginMode';
+import userAuthorization from '../components/userAuthorization';
+import request from '../common/request.js';
+
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '举报'
+  };
+  components = {};
+
+  // mixins = [mixins];
+
+  data = {
+    indexItem: 3,
+    value: '',
+    selesctItem: [],
+    requestParams: {
+      jobComplaintCause: ''
+    }
+  };
+  watch = {};
+  methods = {
+    selectFun(index, k) {
+      var selArray = [];
+      this.requestParams['jobComplaintCause'] = k;
+      selArray = this.selesctItem.map((item, i) => {
+        if (i == index) {
+          return {
+            ...item,
+            selected: true
+          };
+        } else {
+          return {
+            ...item,
+            selected: false
+          };
+        }
+      });
+      this.selesctItem = selArray;
+      this.$apply();
+    },
+    valueChange(e) {
+      var value = e.detail.value;
+      this.value = value;
+      this.requestParams['otherComplaintCause'] = value;
+      this.$apply();
+    },
+    requestReport() {
+      if (this.requestParams.jobComplaintCause == 99 && this.value == '') {
+        this.$parent.methods.showToast('其他原因不能为空');
+        return;
+      } else {
+        wx.getStorage({
+          key: 'reportParams',
+          complete: async res => {
+            if (res.data) {
+              var data = JSON.parse(res.data);
+              delete data.id;
+              request
+                .cehomeRequest(
+                  request.Api.report(),
+                  Object.assign(this.requestParams, data),
+                  'GET'
+                )
+                .then(res => {
+                  if (res.statusCode == 200 && res.data.ret == 0) {
+                    this.$parent.methods.showToast('成功举报');
+                    setTimeout(() => {
+                      wx.navigateBack({
+                        delta: 1
+                      });
+                    },2000)
+                  } else {
+                    this.$parent.methods.showToast(res.data.msg);
+                  }
+                })
+                .catch(err => {});
+            } else {
+              this.$parent.methods.showToast('请求参数不能为空');
+            }
+          }
+        });
+      }
+    }
+  };
+
+  events = {};
+  onLoad() {
+    this.$parent.sensorsPublic.autoTrackPageShow('举报页');
+
+    // var that = this;
+    this.getReportResron();
+  }
+  // COMPLAINT,
+  getReportResron() {
+    wx.getStorage({
+      key: 'allDictionarles',
+      complete: async res => {
+        if (res.data) {
+          var data = [];
+          data = JSON.parse(res.data)['COMPLAINT'].map((item, i) => {
+            return {
+              ...item,
+              selected: false
+            };
+          });
+          this.selesctItem = data;
+          this.$apply();
+        }
+      }
+    });
+  }
+  onShow() {}
+}
+</script>
+
+<style lang="less" scoped>
+.report {
+  padding: 40rpx;
+  textarea {
+    margin-top: 56rpx;
+    border: 1rpx solid #dce2ee;
+    border-radius: 4rpx;
+    height: 300rpx;
+    width: 100%;
+    padding: 32rpx;
+    font-size: 30rpx;
+    color: #2d2d33;
+    box-sizing: border-box;
+  }
+  .roportBtn {
+    margin-top: 80rpx;
+    width: 100%;
+    height: 92rpx;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background: #3b6afb;
+    color: #ffffff;
+  }
+  .select {
+    display: flex;
+    flex-direction: column;
+    color: #2d2d33;
+    .title {
+      font-size: 32rpx;
+      letter-spacing: 0.28rpx;
+    }
+    .reportItem {
+      display: inline-block;
+      padding-top: 43rpx;
+      font-size: 30rpx;
+      letter-spacing: 0.4rpx;
+      &.selectW {
+        &::before {
+          content: '\5708';
+          font-family: 'TieJia';
+          display: inline-block;
+          font-size: 32rpx;
+          height: 40rpx;
+          color: #3b6afb;
+          opacity: 0.7;
+          margin-right: 25rpx;
+        }
+      }
+      &.selectActive {
+        &::before {
+          content: '\4e0b';
+          font-family: 'TieJia';
+          display: inline-block;
+          font-size: 32rpx;
+          height: 40rpx;
+          color: #3b6afb;
+          margin-right: 25rpx;
+        }
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,58 @@
+<template>
+  <button class="login {{state.login.status != 'success' ? 'show' : 'hidden'}}" open-type="getUserInfo" bindgetuserinfo="onGotUserInfo">
+  </button>
+</template>
+<script>
+import wepy from 'wepy'
+import { connect } from 'wepy-redux'
+import { auth } from '../store/actions'
+
+@connect(
+  {
+    state(state) {
+      return state
+    }
+  },
+  {
+    auth
+  }
+)
+export default class loginMode extends wepy.component {
+  data = {}
+  events = {}
+
+  watch = {}
+
+  onLoad() {
+    // this.userInfo:
+  }
+
+  methods = {
+    onGotUserInfo: function(e) {
+      if (e.detail.errMsg == 'getUserInfo:fail auth deny') {
+      } else {
+        this.methods.auth()
+        this.$emit('phoneAuthorizat', e)
+      }
+    }
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.login {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+.hidden {
+  display: none;
+}
+.show {
+  display: block;
+}
+</style>
+

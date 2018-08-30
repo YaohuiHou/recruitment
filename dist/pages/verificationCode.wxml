@@ -1,0 +1,21 @@
+
+  <view class="container _9562b16">
+    <text class="title _9562b16">输入验证码</text>
+    <text class="desc _9562b16">已发送4位验证码到 {{mobile}}</text>
+    <view class="inputGroup _9562b16" bindtap="IsFouce">
+      <input type="number" focus="{{isFouce}}" value="{{newValue}}" bindblur="notFocus" maxlength="4" data-index="0" bindinput="inputChange" class="_9562b16"/>
+      <view class="{{length == 0 ? 'inputActive' : 'inputActiveEd'}} _9562b16" data-index="0" bindtap="itemTap">
+        <text class="_9562b16">{{inputVal[0]}}</text>
+      </view>
+      <view class="{{length == 1 ? 'inputActive' : 'inputActiveEd'}} _9562b16" data-index="1" bindtap="itemTap">
+        <text class="_9562b16">{{inputVal[1]}}</text>
+      </view>
+      <view class="{{length == 2 ? 'inputActive' : 'inputActiveEd'}} _9562b16" data-index="2" bindtap="itemTap">
+        <text class="_9562b16">{{inputVal[2]}}</text>
+      </view>
+      <view class="{{length == 3 ? 'inputActive' : 'inputActiveEd'}} _9562b16" data-index="3" bindtap="itemTap">
+        <text class="_9562b16">{{inputVal[3]}}</text>
+      </view>
+    </view>
+    <text class="resend {{can ? 'can' : 'cant'}} _9562b16" bindtap="send" data-wpysend-a="{{can}}">{{verificationInfo}}</text>
+  </view>

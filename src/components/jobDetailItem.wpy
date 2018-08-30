@@ -1,0 +1,103 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span">小挖机手</text><text class="salary money">6500-7000元/月</text>
+    </view>
+    <view class="li info">
+      <text class="title">工作地点</text>
+      <text class="dian">:</text>
+      <view class="right">
+        <text>山东烟台</text>
+      </view>
+    </view>
+    <view class="li info">
+      <text class="title">更新时间</text>
+      <text class="dian">:</text>
+      <view class="right">
+        <text>2017.12.20</text>
+        <text>已有11人收藏</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy';
+export default class Index extends wepy.component {
+  props = {
+    loaderTitle: {}
+  };
+  data = {
+    info: [
+      {
+        name: '联系人',
+        value: '',
+        type: 'name'
+      },
+      {
+        name: '联系电话',
+        value: '',
+        type: 'tel'
+      }
+    ]
+  };
+  onLoad() {}
+
+  methods = {
+    // 失去焦点保存
+    inputFun(e) {
+      let val = e.detail.value;
+      // 验证手机号
+      if (e.target.dataset.type === 'tel') {
+        if (
+          /^1(([38]\d)|(4[57])|(5[012356789])|(6[6])|(7[0678])|(9[89]))\d{8}$/.test(
+            val
+          )
+        ) {
+          // 保存手机号
+          this.$emit('editorData', 'tel', val);
+        } else {
+          wx.showToast({
+            title: '请输入正确的手机号',
+            icon: 'none',
+            duration: 1200
+          });
+          this.$emit('editorData', 'tel', '');
+          return;
+        }
+      } else if (val.length <= 0) {
+        wx.showToast({
+          title: '输入框不能为空',
+          icon: 'none',
+          duration: 1200
+        });
+        return;
+      }
+      this.$emit('editorData', e.target.dataset.type, val);
+    }
+  };
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  margin-bottom: 30rpx;
+  .money {
+    margin-left: 30rpx;
+  }
+  .li {
+    padding: 22rpx 0 0 0;
+    align-items: center;
+    .right {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      flex-grow: 1;
+      font-size: 28rpx;
+      color: #2d2d33;
+      letter-spacing: 0.25rpx;
+    }
+  }
+}
+</style>

@@ -1,0 +1,102 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span">{{statusType.title}}</text>
+      <!-- <text class="icon">问</text> -->
+    </view>
+    <view class="li require">
+      <view class="types">
+        <view wx:for="{{statusType.types}}"  @tap="selectFun('{{index}}')" class="option {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+            <text class="name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy'
+export default class Index extends wepy.component {
+  props = {
+    item: {},
+    editorDataObject: {
+      twoWay: true
+    },
+    statusType: {
+      twoWay: true
+    }
+  }
+  data = {
+    // 职位状态
+  }
+
+  watch = {
+    editorDataObject() {
+      this.chooseStatus(this.editorDataObject.status)
+    }
+  }
+  onLoad() {}
+
+  methods = {
+    // 点击选中
+    selectFun(index) {
+      this.chooseStatus(this.statusType.types[index].value)
+    }
+  }
+
+  chooseStatus(status) {
+    this.statusType.types.forEach((element, i) => {
+      element.select = false
+      if (element.value == status) {
+        element.select = true
+        this.$emit('editorData', element.type, element.value)
+      }
+    })
+    this.$apply()
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  .li {
+    align-items: center;
+    &.require {
+      padding: 20rpx 0;
+      .types {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-grow: 1;
+        .option {
+          flex: 1;
+          margin-right: 12rpx;
+          border: 1rpx solid rgba(189, 193, 201, 0.7);
+          border-radius: 4rpx;
+          height: 68rpx;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          justify-content: center;
+          &.selected {
+            background: rgba(59, 106, 251, 0.08);
+            border-color: rgba(59, 106, 251, 0.7);
+            text {
+              color: #3b6afb;
+              font-weight: bold;
+            }
+          }
+          &:last-child {
+            margin: 0;
+          }
+          .name {
+            font-size: 24rpx;
+            color: #4a4a53;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

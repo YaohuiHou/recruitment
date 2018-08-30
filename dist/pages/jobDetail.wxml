@@ -1,0 +1,138 @@
+
+  <view class="job">
+    <block  wx:if="{{isData}}">
+      <block wx:for="{{itemData}}" wx:for-index="itemIndex" wx:key="itemIndex" wx:for-item="itemLi">
+        
+  <view class="item _49956f8">
+    <view class="header _49956f8">
+      <text class="span {{itemIndex == 0 ? '' : 'leftLine'}} _49956f8">{{itemLi.title}}</text><text class="salary money _49956f8">{{itemLi.settlementAmountStr}}</text>
+    </view>
+    <view class="li info _49956f8"  wx:for="{{itemLi.list}}" wx:key="index" wx:for-item="listItem">
+      <block wx:if="{{listItem.name}}" class="_49956f8">
+        <text class="title _49956f8">{{listItem.name}}</text>
+        <text class="dian _49956f8">:</text>
+          <view class="right _49956f8">
+            <text class="_49956f8">{{listItem.value}}</text>
+            <block wx:if="{{listItem.other}}" class="_49956f8">
+              <block wx:if="{{listItem.other != 0}}" class="_49956f8">
+                <text class="_49956f8">已有{{listItem.other}}人收藏</text>
+              </block>
+            </block>
+          </view>
+      </block>
+      <block wx:if="{{!listItem.name}}" class="_49956f8">
+        <view class="imageList _49956f8">
+          <image wx:for="{{listItem.value}}" item="item" wx:key="index" src="{{item}}" bindtap="$jobdesc$previceIamge" class="_49956f8" data-com-index="{{undefined}}" data-wpypreviceiamge-a="{{item}}" data-wpypreviceiamge-b="{{listItem.value}}"/>
+        </view>
+      </block>
+    </view>
+  </view>
+      </block>
+      <block wx:if="{{page == 'mapList'}}">
+        <block wx:if="{{personInfo.userName != ''}}">
+          
+  <view class="item _5d66bb8">
+    <view class="header _5d66bb8">
+      <text class="span leftLine _5d66bb8">简历发布人</text>
+    </view>
+    <view class="li personMan _5d66bb8">
+      <view class="left _5d66bb8">
+        <view class="avatar _5d66bb8">
+          <image src="{{$resumeRelease$personInfo.userAvatar}}" class="_5d66bb8"/>
+        </view>
+        <text class="nickName _5d66bb8">{{$resumeRelease$personInfo.userName}}</text>
+        <text  wx:if="{{$resumeRelease$personInfo.legalizeType == 1 || $resumeRelease$personInfo.legalizeType == 2}}" class="realStatus _5d66bb8">已实名</text>
+      </view>
+      <view class="right _5d66bb8" bindtap="$resumeRelease$navigatePer" data-wpynavigateper-a=""><text class="_5d66bb8">查看主页</text><text class="jiantou _5d66bb8"/></view>
+    </view>
+  </view>
+        </block>
+        
+  <view class="tips _1cef7d2">
+    <text class="tip _1cef7d2">联系我时，请说在铁甲网看到的。</text>
+    <text class="desc _1cef7d2">如遇无效、虚假、诈骗信息，请立即举报</text>
+    <text class="desc _1cef7d2">可通过电话或者消息沟通，尽可能了解详细的职位情况</text>
+  </view>
+      </block>
+      
+    <view class="footerBtn _785736a">
+      <block  wx:if="{{$footerBtn$page == 'mapList'}}" class="_785736a">
+          <view class="other _785736a">
+            <block wx:if="{{$footerBtn$btnParams.favoriteFlag == 1}}" class="_785736a">
+              <text class="collectioned _785736a" bindtap="$footerBtn$collection">已收藏</text>
+            </block>
+            <block wx:if="{{$footerBtn$btnParams.favoriteFlag == 0}}" class="_785736a">
+              <text class="collection _785736a" bindtap="$footerBtn$collection">收藏</text>
+            </block>
+            <text class="report _785736a" bindtap="$footerBtn$naviRoprt">举报</text>
+          </view>
+          <text class="tel _785736a" bindtap="$footerBtn$callPone">电话咨询</text>
+      </block>
+      <block  wx:if="{{$footerBtn$page != 'mapList'}}" class="_785736a">
+        <view class="footerBtn resumeDetailEditor _785736a">
+        <text bindtap="$footerBtn$editor" class="_785736a">编辑</text>
+        <!-- <text class="haibao">生成海报</text> -->
+      </view>
+      </block>
+      <block  wx:if="{{!$footerBtn$isClose}}" class="_785736a">
+        
+  <view class="login-mode {{!$footerBtn$LoginMode$isClose ? '' : 'hidden'}} _facbad4 _785736a" bindtap="$footerBtn$LoginMode$isClose">
+    <view class="container _facbad4">
+      <text class="title _facbad4">登录或注册</text>
+      <button class="wxLogin _facbad4" type="primary" open-type="getUserInfo" bindgetuserinfo="$footerBtn$LoginMode$onGotUserInfo">
+        <text class="wx _facbad4">微信账号快速登录</text>
+      </button>
+      <button class="wxLogin _facbad4" bindtap="$footerBtn$LoginMode$goNavigator">
+        <text class="tel _facbad4">手机号注册/登录</text>
+      </button>
+      <!-- <text>{{text}}</text> -->
+    </view>
+  </view>
+      </block>
+    
+  <view class="popup {{$footerBtn$popup$info.show ? '' : 'popupHidden'}} _d2ffeb6 _785736a" bindtap="$footerBtn$popup$hidePopup">
+    <block  wx:if="{{$footerBtn$popup$info.type == 'notice'}}" class="_d2ffeb6">
+      <view class="container _d2ffeb6">
+        <text class="title _d2ffeb6">{{$footerBtn$popup$info.title}}</text>
+        <text class="desc _d2ffeb6">{{$footerBtn$popup$info.desc}}</text>
+        <view class="options _d2ffeb6">
+          <text class="cancal _d2ffeb6" bindtap="$footerBtn$popup$cancal">取消</text>
+          <text class="sure _d2ffeb6" bindtap="$footerBtn$popup$sure">确认</text>
+        </view>
+      </view>
+    </block>
+    <block  wx:if="{{$footerBtn$popup$info.type == 'success'}}" class="_d2ffeb6">
+      <view class="container _d2ffeb6">
+        <text class="icon _d2ffeb6"/>
+        <text class="title _d2ffeb6">{{$footerBtn$popup$info.title}}</text>
+        <text class="desc _d2ffeb6">{{$footerBtn$popup$info.desc}}</text>
+        <view class="options _d2ffeb6">
+          <button class="share _d2ffeb6" id="shareBtn" data-productId="{{$footerBtn$popup$productId}}" open-type="share" type="primary" hover-class="other-button-hover"><text class="share _d2ffeb6" bindtap="$footerBtn$popup$share">转发需求到微信群</text></button>
+        </view>
+      </view>
+    </block>
+    <block  wx:if="{{$footerBtn$popup$info.type == 'tel'}}" class="_d2ffeb6">
+      <view class="container _d2ffeb6" catchtap="$footerBtn$popup$stop">
+        <image src="https://bbs.cehome.com/wxApp/jobResume/imgs/phone.svg" class="_d2ffeb6"/>
+        <!-- <text class="icon tel"></text> -->
+        <text class="title _d2ffeb6">好工作不等人，赶紧电话联系吧~</text>
+        <input type="tel" maxlength="11" value="{{$footerBtn$popup$telValue}}" bindinput="$footerBtn$popup$change" placeholder="请输入手机号" placeholder-style="font-size: 26rpx;color:#9ea4af;letter-spacing: 0.35rpx;" class="_d2ffeb6"/>
+        <view class="callPhone {{$footerBtn$popup$telValue.length > 0 ? 'active' : 'preActive'}} _d2ffeb6" bindtap="$footerBtn$popup$callPhone"><text class="callPhoneText _d2ffeb6">免费通话</text></view>
+      </view>
+    </block>
+
+  </view>
+
+    </view>
+  <!-- <view class="footerBtn jobDetailEditor">
+    <text>编辑</text>
+  </view> -->
+    </block>
+    <block wx:if="{{!isData}}">
+      
+  <view class="nothing _8216152">
+    <image src="https://bbs.cehome.com/wxApp/v.2/nothing.png" class="_8216152"/>
+    <text class="_8216152">{{$nothing$isDataDesc}}~</text>
+  </view>
+    </block>
+  </view>

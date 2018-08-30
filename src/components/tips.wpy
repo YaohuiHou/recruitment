@@ -1,0 +1,46 @@
+ <template>
+  <view class="tips">
+    <text class="tip">联系我时，请说在铁甲网看到的。</text>
+    <text class="desc">如遇无效、虚假、诈骗信息，请立即举报</text>
+    <text class="desc">可通过电话或者消息沟通，尽可能了解详细的职位情况</text>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy';
+export default class Index extends wepy.component {
+  props = {};
+  data = {};
+  onLoad() {}
+
+  methods = {};
+}
+</script>
+
+<style lang="less" scoped>
+.tips {
+  display: flex;
+  flex-direction: column;
+  .tip {
+    display: inline-block;
+    padding-top: 32rpx;
+    font-size: 28rpx;
+    color: #9ea4af;
+    letter-spacing: 0.25rpx;
+  }
+  .desc {
+    display: inline-block;
+    padding-top: 20rpx;
+    font-size: 22rpx;
+    color: #ff5b3e;
+    letter-spacing: 0.19rpx;
+    &::before {
+      content: '\e638';
+      font-family: 'TieJia';
+      display: inline-block;
+      margin-right: 10rpx;
+    }
+  }
+}
+</style>

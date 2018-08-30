@@ -1,0 +1,185 @@
+<template>
+  <view class="login-mode {{!isClose ? '' : 'hidden'}}" @tap="isClose">
+    <view class="container">
+      <text class="title">登录或注册</text>
+      <button class="wxLogin" type="primary" open-type="getUserInfo" bindgetuserinfo="onGotUserInfo">
+        <text class="wx">微信账号快速登录</text>
+      </button>
+      <button class="wxLogin" @tap="goNavigator">
+        <text class="tel">手机号注册/登录</text>
+      </button>
+      <!-- <text>{{text}}</text> -->
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import { connect } from 'wepy-redux'
+import { login } from '../store/actions'
+import request from '../common/request.js'
+import { nowDate } from '../utils/utils.js'
+
+@connect(
+  {
+    state(state) {
+      return state
+    }
+  },
+  {
+    login
+  }
+)
+export default class loginMode extends wepy.component {
+  props = {
+    isClose: {
+      twoWay: true
+    }
+  }
+  data = {
+    text: ''
+  }
+  events = {}
+
+  watch = {}
+  userLogin(params) {
+    // wx.showLoading()
+    request
+      .cehomeRequest(request.Api.getUserByWxUnionid(), params, 'POST')
+      .then(res => {
+        this.text = JSON.stringify(res)
+        this.$apply()
+        if (res.statusCode == 200 && res.data.ret == 0) {
+          wx.hideLoading()
+          wx.setStorageSync(
+            'loginInfo',
+            Object.assign(res.data.data, { registerTime: nowDate(new Date()) })
+          )
+          wx.setStorageSync('isPopup', {
+            registerTime: nowDate(new Date()),
+            isPopup: true
+          })
+          this.methods.login(res.data.data)
+        } else if (res.statusCode == 200 && res.data.ret == 4012) {
+          // wx.hideLoading()
+          wx.setStorageSync('submitParams', params)
+          wx.navigateTo({
+            url: 'register'
+          })
+        } else {
+          wx.showToast({
+            title: res.data.msg ? res.data.msg : '请求失败',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+      .catch(err => {
+        this.text = JSON.stringify(err)
+        this.$apply()
+        if (err.errMsg == 'request:fail timeout') {
+          wx.showToast({
+            title: '网络请求超时~',
+            icon: 'none',
+            duration: 2000
+          })
+        } else {
+          wx.showToast({
+            title: '网络好像有问题，请检查网络~',
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+  }
+  methods = {
+    isClose() {
+      this.isClose = true
+      this.$apply()
+    },
+    goNavigator() {
+      wx.navigateTo({
+        url: 'register'
+      })
+    },
+    getPhoneNumber: function(e) {
+      if (e.detail.encryptedData) {
+        let params = {
+          encryptedData: e.detail.encryptedData,
+          iv: e.detail.iv,
+          sessionKey: this.state.login.wxInfo.session_key
+        }
+        this.methods.login(params)
+      }
+    },
+    onGotUserInfo: function(e) {
+      var params = {}
+      if (e.detail.errMsg == 'getUserInfo:fail auth deny') {
+      } else if (this.state.login.wxInfo.unionid) {
+        params['wxUnionid'] = this.state.login.wxInfo.unionid
+        this.userLogin(params)
+      } else {
+        params['encryptedData'] = e.detail.encryptedData
+        params['iv'] = e.detail.iv
+        params['sessionKey'] = this.state.login.wxInfo.session_key
+        this.userLogin(params)
+      }
+    }
+  }
+}
+</script>
+<style lang="less" scoped>
+.hidden {
+  display: none !important;
+}
+.login-mode {
+  position: fixed;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  .container {
+    width: 500rpx;
+    height: 400rpx;
+    padding: 50rpx 0;
+    border-radius: 20rpx;
+    background-color: #ffffff;
+    .title {
+      font-size: 30rpx;
+      color: #2d2d33;
+    }
+    .wxLogin {
+      width: 400rpx;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      .wx,
+      .tel {
+        font-size: 30rpx;
+        color: #fff;
+        &::before {
+          content: '\e7c5';
+          display: inline-block;
+          font-family: 'TieJia';
+          margin-right: 20rpx;
+          font-size: 30rpx;
+          color: #dadce0;
+          vertical-align: middle;
+        }
+      }
+      .tel {
+        color: #4a4a53;
+        &:before {
+          content: '\e612';
+        }
+      }
+    }
+  }
+}
+</style>
+
+

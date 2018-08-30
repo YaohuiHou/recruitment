@@ -1,0 +1,91 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span {{itemIndex == 0 ? '' : 'leftLine'}}">{{item.title}}</text><text class="salary money">{{item.settlementAmountStr}}</text>
+    </view>
+    <view class="li info" wx:for="{{item.list}}" wx:key="index" wx:for-item="listItem">
+      <block wx:if="{{listItem.name}}">
+        <text class="title">{{listItem.name}}</text>
+        <text class="dian">:</text>
+          <view class="right">
+            <text>{{listItem.value}}</text>
+            <block wx:if="{{listItem.other}}">
+              <block wx:if="{{listItem.other != 0}}">
+                <text>已有{{listItem.other}}人收藏</text>
+              </block>
+            </block>
+          </view>
+      </block>
+      <block wx:if="{{!listItem.name}}">
+        <view class="imageList">
+          <image wx:for="{{listItem.value}}" item="item" wx:key="index" src="{{item}}" @tap="previceIamge('{{item}}','{{listItem.value}}')"/>
+        </view>
+      </block>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy';
+export default class Index extends wepy.component {
+  props = {
+    item: {
+      twoWay: true
+    },
+    itemIndex: {
+      twoWay: true
+    }
+  };
+  data = {};
+  onLoad() {}
+
+  methods = {
+    previceIamge(nowUrl, urls) {
+      wx.previewImage({
+        current: nowUrl, // 当前显示图片的http链接
+        urls: urls // 需要预览的图片http链接列表
+      });
+    }
+  };
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  // margin-bottom: 30rpx;
+  .money {
+    margin-left: 30rpx;
+    color: #2d2d33;
+  }
+  .li {
+    padding: 22rpx 0 0 0;
+    align-items: center;
+    .right {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      flex-grow: 1;
+      font-size: 28rpx;
+      color: #2d2d33;
+      letter-spacing: 0.25rpx;
+    }
+    .imageList {
+      display: flex;
+      flex-flow: wrap;
+      justify-content: flex-start;
+      :nth-child(2) {
+        margin: 0 18rpx 0 18rpx;
+      }
+      :nth-child(5) {
+        margin: 0 18rpx 0 18rpx;
+      }
+      image {
+        width: 218rpx;
+        height: 296rpx;
+        margin-bottom: 18rpx;
+      }
+    }
+  }
+}
+</style>

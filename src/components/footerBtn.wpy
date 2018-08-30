@@ -1,0 +1,311 @@
+ <template>
+    <view class="footerBtn">
+      <block wx:if="{{page == 'mapList'}}">
+          <view class="other">
+            <block wx:if="{{btnParams.favoriteFlag == 1}}">
+              <text class="collectioned" @tap="collection">已收藏</text>
+            </block>
+            <block wx:if="{{btnParams.favoriteFlag == 0}}">
+              <text class="collection" @tap="collection">收藏</text>
+            </block>
+            <text class="report" @tap="naviRoprt">举报</text>
+          </view>
+          <text class="tel" @tap="callPone">电话咨询</text>
+      </block>
+      <block wx:if="{{page != 'mapList'}}">
+        <view class="footerBtn resumeDetailEditor">
+        <text @tap="editor">编辑</text>
+        <!-- <text class="haibao">生成海报</text> -->
+      </view>
+      </block>
+      <block wx:if="{{!isClose}}">
+        <LoginMode :isClose.sync="isClose"/>
+      </block>
+    <popup :info.sync="popupInfo"></popup>
+
+    </view>
+  <!-- <view class="footerBtn jobDetailEditor">
+    <text>编辑</text>
+  </view> -->
+</template>
+
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import popup from '../components/popup';
+import request from '../common/request.js';
+import LoginMode from '../components/LoginMode';
+@connect({
+  state(state) {
+    return state;
+  }
+})
+export default class Index extends wepy.component {
+  props = {
+    page: {
+      twoWay: true
+    },
+    btnParams: {
+      twoWay: true
+    },
+    datas: {}
+  };
+  computed = {
+    jobId() {
+      return this.btnParams.id;
+    }
+  };
+  components = {
+    LoginMode,
+    popup
+  };
+  data = {
+    isClose: true,
+    popupInfo: {
+      show: false
+    }
+  };
+  onLoad() {
+    // this.jobId = this.btnParams.id;
+    // this.$apply();
+  }
+  requestCollection = () => {
+    var userId = this.state.login.userInfo.uid;
+    let url =
+      this.btnParams.favoriteFlag == 1
+        ? request.Api.favCancel()
+        : request.Api.favAdd();
+    this.btnParams['jobId'] = this.jobId;
+    this.btnParams['userId'] = userId;
+    // delete this.btnParams.id;
+
+    request
+      .cehomeRequest(url, { ...this.btnParams, id: '' }, 'GET')
+      .then(res => {})
+      .catch(err => {});
+  };
+
+  methods = {
+    collection() {
+      if (this.state.login.status == 'success') {
+        this.requestCollection();
+        this.btnParams.favoriteFlag = this.btnParams.favoriteFlag == 1 ? 0 : 1;
+      } else {
+        this.isClose = false;
+        this.$apply();
+      }
+    },
+    callPone() {
+      if (this.state.login.status != 'success') {
+        this.isClose = false;
+        this.$apply();
+      } else {
+        var userId = this.state.login.userInfo.uid;
+        var mobile = this.state.login.userInfo.mobile;
+
+        this.btnParams['jobId'] = this.jobId;
+        this.btnParams['userId'] = userId;
+        this.btnParams['distinctId'] = userId;
+        // delete this.btnParams.id;
+
+        var action = this.btnParams.jobType == 2 ? '求职' : '招聘';
+        this.$parent.$parent.sensorsPublic.RelatedBurialPoint(
+          '点击电话按钮',
+          action
+        );
+        var popupParams = {
+          show: true,
+          type: 'tel', //弹窗类型 ‘notice 表示警示弹窗 ’success 表示成功
+          callback: res => {
+            if (res) {
+              this.btnParams['calledPhoneNumber'] = res;
+              wx.showLoading();
+              request
+                .cehomeRequest(
+                  request.Api.callPhone(),
+                  { ...this.btnParams, id: '' },
+                  'GET'
+                )
+                .then(res => {
+                  if (res.statusCode == 200 && res.data.ret == 0) {
+                    wx.hideLoading();
+                    this.$parent.$parent.sensorsPublic.RelatedBurialPoint(
+                      '拨通电话',
+                      action
+                    );
+                    wx.showToast({
+                      title: '电话拨通中...',
+                      icon: 'none',
+                      duration: 4000
+                    });
+                    this.popupInfo.show = false;
+                    this.$apply();
+                  }
+                })
+                .catch(err => {});
+            }
+          }
+        };
+        this.popupInfo = popupParams;
+        this.$apply();
+        // this.$emit('popupParamsUpdate', popupParams);
+      }
+    },
+    naviRoprt() {
+      if (this.state.login.status != 'success') {
+        this.isClose = false;
+        this.$apply();
+      } else {
+        var userId = this.state.login.userInfo.uid;
+        var mobile = this.state.login.userInfo.mobile;
+
+        this.btnParams['jobId'] = this.btnParams.id;
+        this.btnParams['userId'] = userId;
+        this.btnParams['userPhoneNumber'] = mobile;
+        this.btnParams['distinctId'] = userId;
+        wx.setStorage({
+          key: 'reportParams',
+          data: JSON.stringify(this.btnParams)
+        });
+        wx.navigateTo({
+          url: `report`
+        });
+      }
+    },
+    editor() {
+      let pathUrl = '';
+      if (this.btnParams.jobType == 1) {
+        pathUrl = 'postjob';
+      } else if (this.btnParams.jobType == 2) {
+        pathUrl = 'postResume';
+      }
+      wx.setStorage({
+        key: 'editorData',
+        data: JSON.stringify(this.datas)
+      });
+      wx.navigateTo({
+        url: `${pathUrl}?type=editor&id=${this.btnParams.id}`
+      });
+    }
+  };
+}
+</script>
+
+<style lang="less" scoped>
+.footerBtn {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  height: 98rpx;
+  line-height: 98rpx;
+  text-align: center;
+  background-color: #ffffff;
+  border-top: 1rpx solid rgba(220, 226, 238, 0.6);
+  &.jobDetailEditor {
+    text {
+      font-size: 32rpx;
+      color: #3b6afb;
+      letter-spacing: 0.28rpx;
+      text-align: center;
+      font-weight: bold;
+    }
+  }
+  &.resumeDetailEditor {
+    text {
+      flex: 1;
+      font-size: 32rpx;
+      color: #3b6afb;
+      letter-spacing: 0.28rpx;
+      text-align: center;
+      &.haibao {
+        background: #3b6afb;
+        color: #ffffff;
+      }
+    }
+  }
+
+  .other {
+    width: 275rpx;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    text {
+      flex: 1;
+      display: flex;
+      // height: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 20rpx;
+      letter-spacing: 0.18rpx;
+      &.collection {
+        color: #6a6a77;
+        &::before {
+          content: '\661f';
+          font-family: 'TieJia';
+          display: inline-block;
+          font-size: 32rpx;
+          height: 40rpx;
+        }
+      }
+      &.report {
+        color: #6a6a77;
+
+        &::before {
+          content: '\e63d';
+          font-family: 'TieJia';
+          display: inline-block;
+          font-size: 32rpx;
+          height: 40rpx;
+        }
+      }
+      &.collectioned {
+        color: #6a6a77;
+        &::before {
+          color: #ffb413;
+          content: '\661f';
+          font-family: 'TieJia';
+          display: inline-block;
+          font-size: 32rpx;
+          height: 40rpx;
+        }
+      }
+      &.reported {
+        color: #6a6a77;
+        &::before {
+          color: #ff5b3e;
+          content: '\e640';
+          font-family: 'TieJia';
+          display: inline-block;
+          font-size: 32rpx;
+          height: 40rpx;
+        }
+      }
+    }
+    // font-size: 32rpx;
+    // color: #3b6afb;
+    // letter-spacing: 0.28rpx;
+    // text-align: center;
+    // font-weight: bold;
+  }
+  .tel {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background: #3b6afb;
+    border-radius: 4rpx;
+    font-size: 32rpx;
+    color: #ffffff;
+    letter-spacing: 0.28rpx;
+    margin: 10rpx 20rpx;
+    // text-align: center;
+  }
+}
+</style>

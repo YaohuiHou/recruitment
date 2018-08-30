@@ -1,0 +1,38 @@
+
+  <view class="contariner _dab9ee0">
+    <scroll-view class="content _dab9ee0" scroll-y="{{scrollNeed}}" enable-back-to-top="true">
+      <view class="currentLocation _dab9ee0"  wx:if="{{allCity.province}}">
+          <text class="title _dab9ee0">定位到位置</text>
+          <view class="city _dab9ee0"><text class="location _dab9ee0">{{allCity.province}} {{allCity.city}} {{allCity.district}}</text></view>
+      </view>
+      <view class="province _dab9ee0">
+        <block  wx:for="{{cityList}}" wx:key="{{index}}" class="_dab9ee0">
+            <text bindtap="choose" class="_dab9ee0" data-wpychoose-a="{{item}}" data-wpychoose-b="{{index}}">{{item.name}}</text>
+        </block>
+      </view>
+    </scroll-view>
+    
+  <view class="container {{$sidebar$sidebarInfo.show ? 'show' : 'hide'}} _237d934 _dab9ee0">
+    <!-- <view class="left"><text>{{sidebarInfo.show}}</text></view> -->
+    <scroll-view class="content _237d934" scroll-y>
+      <view class="list _237d934">
+        <view class="text _237d934"  wx:if="{{$sidebar$page === 'index'}}">
+          <text bindtap="$sidebar$chooseAll" class="_237d934" data-wpychooseall-a="{{$sidebar$cityData}}" data-wpychooseall-b="1">全部</text>
+        </view>
+        <block  wx:for="{{$sidebar$cityData.children}}" wx:key="{{index}}" class="_237d934">
+            <view class="text _237d934">
+              <text bindtap="$sidebar$chooseSeria" class="_237d934" data-wpychooseseria-a="{{item}}" data-wpychooseseria-b="{{index}}">{{item.name}}</text>
+              <view class="other _237d934" wx:if="{{item.select}}">
+                <text wx:if="{{$sidebar$page === 'index'}}" bindtap="$sidebar$chooseAll" class="_237d934" data-wpychooseall-a="{{item}}" data-wpychooseall-b="2">全部</text>
+                <block wx:for="{{item.children}}" wx:for-item="cityItem" wx:for-index="cityIndex" wx:key="{{cityIndex}}" class="_237d934">
+                  <text bindtap="$sidebar$chooseModel" class="_237d934" data-wpychoosemodel-a="{{item}}" data-wpychoosemodel-b="{{cityIndex}}">{{cityItem.name}}</text>
+                </block>
+              </view>
+            </view>
+        </block>
+      </view>
+    </scroll-view>
+    <view class="mark _237d934" bindtap="$sidebar$hide"/>
+  </view>
+
+  </view>

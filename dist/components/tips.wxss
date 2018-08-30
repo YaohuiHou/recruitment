@@ -1,0 +1,1 @@
+.tips._1cef7d2{display:flex;flex-direction:column}.tips .tip._1cef7d2{display:inline-block;padding-top:32rpx;font-size:28rpx;color:#9ea4af;letter-spacing:.25rpx}.tips .desc._1cef7d2{display:inline-block;padding-top:20rpx;font-size:22rpx;color:#ff5b3e;letter-spacing:.19rpx}.tips .desc._1cef7d2::before{content:'\e638';font-family:'TieJia';display:inline-block;margin-right:10rpx}

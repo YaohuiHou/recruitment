@@ -1,0 +1,422 @@
+<template>
+  <view class="job">
+    <block wx:if="{{isData}}">
+      <repeat wx:for="{{itemData}}" wx:for-index="itemIndex" wx:key="itemIndex" wx:for-item="itemLi">
+        <jobdesc :item.sync="itemLi" :itemIndex.sync="itemIndex"/>
+      </repeat>
+      <block wx:if="{{page == 'mapList'}}">
+        <block wx:if="{{personInfo.userName != ''}}">
+          <resumeRelease :personInfo.sync="personInfo"/>
+        </block>
+        <tips></tips>
+      </block>
+      <footerBtn :page.sync="page" :btnParams.sync="btnParams" :datas.sync="datas"></footerBtn>
+    </block>
+    <block wx:if="{{!isData}}">
+      <nothing :isDataDesc.sync="isDataDesc"></nothing>
+    </block>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import { connect } from 'wepy-redux'
+import API from '../common/api.js'
+import jobdesc from '../components/jobDesc'
+import resumeRelease from '../components/resumeRelease'
+import footerBtn from '../components/footerBtn'
+import tips from '../components/tips'
+import nothing from '../components/nothing'
+import request from '../common/request.js'
+import { clearArrTrim } from '../utils/utils.js'
+
+@connect({
+  state(state) {
+    return state
+  }
+})
+export default class Index extends wepy.page {
+  onShareAppMessage() {
+    return {
+      title: '我在这里找替班司机，技术好还便宜',
+      path: `/pages/index?id=${this.jobId}&shareType=jobDetail`,
+      imageUrl: 'https://bbs.cehome.com/wxApp/jobResume/imgs/share.png',
+      success: function(res) {
+        // 转发成功
+      },
+      fail: function(res) {
+        // 转发失败
+      }
+    }
+  }
+  config = {
+    navigationBarTitleText: '职位详情'
+  }
+  components = {
+    jobdesc,
+    nothing,
+    resumeRelease,
+    tips,
+    footerBtn
+  }
+  data = {
+    jobId: '',
+    datas: {},
+    itemData: [],
+    isData: true,
+    isDataDesc: '',
+    page: '',
+    btnParams: {},
+    personInfo: {}
+  }
+
+  methods = {}
+  onShow() {}
+  events = {}
+  onLoad(options) {
+    this.page = options.page
+    this.$parent.sensorsPublic.autoTrackPageShow('职位详情页')
+
+    wx.showLoading()
+    this.jobId = options.id
+    this.$apply()
+    this.getJobDetail(options.id)
+  }
+  getJobDetail(id) {
+    var userLogin = this.state.login
+    var userId = userLogin.status == 'success' ? userLogin.userInfo.uid : ''
+    //
+    var url =
+      this.page == 'mapList'
+        ? request.Api.hiringDriverDetails()
+        : request.Api.myDetails()
+    request
+      .cehomeRequest(url, { userId: userId, id: id }, 'POST', this)
+      .then(res => {
+        if (res.statusCode == 200 && res.data.data) {
+          var data = res.data.data
+          this.datas = res.data.data
+          this.$apply()
+          this.processingData(data)
+          wx.hideLoading()
+        } else {
+          this.isData = false
+          this.isDataDesc = res.data.msg
+          this.$apply()
+        }
+      })
+      .catch(err => {
+        if (err.errMsg == 'request:fail timeout') {
+          this.$parent.methods.showToast('网络请求超时~')
+          this.isData = false
+          this.isDataDesc = '网络请求超时~'
+        } else {
+          this.isData = false
+          this.isDataDesc = '网络好像有问题，请检查网络~'
+          this.$parent.methods.showToast('网络好像有问题，请检查网络~')
+        }
+      })
+  }
+  // 处理请求得到的数据便于遍历组件
+  //
+  processingData(data) {
+    var jobInfo = {}, //职位信息
+      jobInfoArray = [], //职位信息 中list 如 工作地点、更新时间
+      jobDeamnd = {}, //职位要求
+      jobDemandArray = [], //职位要求中 list 如截止日期、驾龄要求等 另外两个同理
+      jobSloary = {},
+      jobSloaryArray = [],
+      jobMoreInfo = {},
+      jobMoreInfoArray = [],
+      bgArray = []
+    for (var key in data) {
+      if (key == 'id') {
+        this.btnParams[key] = data[key]
+        this.btnParams['jobType'] = 1
+        this.btnParams['favoriteFlag'] = data.isFavorite
+        this.btnParams['calledPhoneNumber'] = data.tel
+        this.btnParams['complaintUserId'] = data.userId
+      } else if (
+        key == 'name' ||
+        key == 'userId' ||
+        key == 'auditStatusStr' ||
+        key == 'legalizeType' ||
+        key == 'userName' ||
+        key == 'userAvatar'
+      ) {
+        this.personInfo[key] = data[key]
+        // this.personInfo['headPortrait'] = data.userAvatar;
+      } else if (
+        key == 'title' ||
+        key == 'settlementAmountStr' ||
+        key == 'settlementAmount' ||
+        key == 'area' ||
+        key == 'updateTimeStr' ||
+        key == 'updateTime' ||
+        key == 'favoriteCount'
+      ) {
+        jobInfo['title'] = data.title
+        jobInfo['settlementAmountStr'] = data.settlementAmountStr
+        var name = '',
+          value = data[key]
+        if (value != '' && value != null) {
+          switch (key) {
+            case 'area':
+              name = '工作地点'
+              jobInfoArray.push({ name: name, value: value })
+              break
+            case 'updateTimeStr':
+              name = '更新时间'
+              jobInfoArray.push({
+                name: name,
+                value: value,
+                other: data.favoriteCount
+              })
+              break
+            default:
+              break
+          }
+        }
+        jobInfo['list'] = jobInfoArray
+      } else if (
+        key == 'driverTypeStr' ||
+        key == 'driverType' ||
+        key == 'useHammerFlagStr' ||
+        key == 'useHammerFlag' ||
+        key == 'drivingYears' ||
+        key == 'drivingYearsStr' ||
+        key == 'cutoffTimeStr'
+      ) {
+        jobDeamnd['title'] = '职位要求'
+        var name = '',
+          value = data[key].replace(/\n/g, ' ')
+        if (value != '' && value != null) {
+          switch (key) {
+            case 'driverTypeStr':
+              name = '设备类型'
+              jobDemandArray.splice(0, 0, { name: name, value: value })
+              break
+            case 'useHammerFlagStr':
+              name = '破碎锤'
+              jobDemandArray.splice(1, 0, { name: name, value: value })
+              break
+            case 'drivingYearsStr':
+              name = '驾龄要求'
+              jobDemandArray.splice(2, 0, { name: name, value: value })
+
+              break
+            case 'cutoffTimeStr':
+              name = '截止日期'
+              jobDemandArray.push({
+                name: name,
+                value: value
+              })
+              break
+            default:
+              break
+          }
+        }
+        jobDeamnd['list'] = jobDemandArray
+      } else if (
+        key == 'moreWelfare' ||
+        key == 'settlementAmountStr' ||
+        key == 'settlementType'
+      ) {
+        jobSloary['title'] = '薪资福利'
+        var settType = ['按天结', '按月结', '薪资面议']
+        var name = '',
+          value = data[key]
+        if (value != '' && value != null) {
+          switch (key) {
+            case 'moreWelfare':
+              name = '更多福利'
+              jobSloaryArray.push({ name: name, value: value })
+              break
+            case 'settlementType':
+              name = '结算方式'
+              jobSloaryArray.push(
+                {
+                  name: '薪资',
+                  value: data.settlementAmountStr
+                },
+                {
+                  name: name,
+                  value: settType[value - 1]
+                }
+              )
+              break
+            default:
+              break
+          }
+        }
+        jobSloary['list'] = jobSloaryArray
+      } else if (
+        key == 'operationDirectionStr' ||
+        key == 'worksRelationStr' ||
+        key == 'shiftTypeStr' ||
+        key == 'humanCount' ||
+        key == 'otherWelfare' ||
+        key == 'sitePhotoList' ||
+        key == 'jobRequire'
+      ) {
+        jobMoreInfo['title'] = '更多信息'
+        var name = '',
+          value = data[key]
+        if (value != '' && value != null) {
+          switch (key) {
+            case 'operationDirectionStr':
+              name = '操作方向'
+              jobMoreInfoArray.push({ name: name, value: value })
+              break
+            case 'worksRelationStr':
+              name = '工程类型'
+              jobMoreInfoArray.push({ name: name, value: value })
+              break
+            case 'shiftTypeStr':
+              name = '工作时间'
+              jobMoreInfoArray.push({ name: name, value: value })
+              break
+            case 'humanCount':
+              name = '招聘人数'
+              jobMoreInfoArray.push({ name: name, value: `${value}人` })
+              break
+            case 'otherWelfare':
+              name = '其他福利'
+              jobMoreInfoArray.push({ name: name, value: value })
+              break
+            case 'sitePhotoList':
+              name = '工作环境'
+              jobMoreInfoArray.push({ name: name, value: '' }, { value: value })
+              break
+            case 'jobRequire':
+              name = '经验要求'
+              jobMoreInfoArray.push({ name: name, value: value })
+              break
+            default:
+              break
+          }
+        }
+        jobMoreInfo['list'] = jobMoreInfoArray
+      }
+    }
+    // 清楚数组中空元素
+    jobInfo.list = clearArrTrim(jobInfo.list)
+    jobDeamnd.list = clearArrTrim(jobDeamnd.list)
+    jobSloary.list = clearArrTrim(jobSloary.list)
+    jobMoreInfo.list = clearArrTrim(jobMoreInfo.list)
+
+    bgArray.push(jobInfo, jobDeamnd, jobSloary, jobMoreInfo)
+    this.itemData = bgArray
+    this.$apply()
+  }
+}
+</script>
+<style lang="less">
+.job {
+  padding: 0 30rpx 200rpx 30rpx;
+  .footerBtn {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 98rpx;
+    line-height: 98rpx;
+    text-align: center;
+    background-color: #ffffff;
+    border-top: 1rpx solid rgba(220, 226, 238, 0.6);
+    text {
+      font-size: 32rpx;
+      color: #3b6afb;
+      letter-spacing: 0.28rpx;
+      text-align: center;
+      font-weight: bold;
+    }
+  }
+  .item {
+    padding: 30rpx 0;
+    border-bottom: 1rpx solid rgba(220, 226, 238, 0.6);
+    .salary {
+      color: #ff4757;
+      letter-spacing: 0.25rpx;
+    }
+    .header {
+      display: flex;
+      justify-content: flex-start;
+      flex-direction: row;
+      align-items: center;
+      .span {
+        font-size: 32rpx;
+        font-weight: bold;
+        color: #2d2d33;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        line-height: 40rpx;
+        position: relative;
+        &.leftLine {
+          &:before {
+            content: '';
+            position: absolute;
+            left: -30rpx;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6rpx;
+            height: 28rpx;
+            background: #3b6afb;
+          }
+        }
+        .hint {
+          font-size: 24rpx;
+          line-height: 40rpx;
+          color: #6a6a77;
+          font-weight: 400;
+          margin-left: 24rpx;
+        }
+      }
+      .icon {
+        width: 34rpx;
+        height: 34rpx;
+        display: block;
+        font-family: 'TieJia';
+        text-align: center;
+        line-height: 34rpx;
+        color: #9ea4af;
+      }
+    }
+    .li {
+      display: flex;
+      flex-direction: row;
+      .dian {
+        display: flex;
+        flex-wrap: wrap;
+        text-align: left;
+        height: 40rpx;
+        line-height: 40rpx;
+        padding-right: 30rpx;
+        font-size: 28rpx;
+        color: #6a6a77;
+      }
+      .title {
+        width: 114rpx;
+        height: 40rpx;
+        // padding-right: 20rpx;
+        box-sizing: border-box;
+        color: #9ea4af;
+        display: block;
+        text-align: justify;
+        position: relative;
+        // line-height: 68rpx;
+        font-size: 28rpx;
+        flex-shrink: 0;
+        &:after {
+          content: '';
+          width: 100%;
+          display: inline-block;
+          overflow: hidden;
+          height: 0;
+        }
+      }
+    }
+  }
+}
+</style>

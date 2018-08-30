@@ -1,0 +1,159 @@
+<style lang="less">
+.submintSuccess {
+  display: flex;
+  padding: 32rpx;
+  flex-direction: column;
+  align-items: center;
+  z-index: 100;
+  .icon {
+    &::before {
+      content: '\5bf9';
+      font-family: 'TieJia';
+      color: #00ff66;
+      font-size: 100rpx;
+    }
+  }
+  .status {
+    display: inline-block;
+    padding: 54rpx 0 24rpx 0;
+    font-size: 34rpx;
+    color: #2d2d33;
+    letter-spacing: 0.3rpx;
+    text-align: center;
+    font-weight: bold;
+  }
+  .modifyInfo {
+    margin-top: 90rpx;
+    padding: 20rpx 100rpx;
+    background: rgba(59, 106, 251, 0.1);
+    border-radius: 4rpx;
+    font-size: 34rpx;
+    color: #3b6afb;
+    letter-spacing: 0.3rpx;
+    text-align: center;
+  }
+}
+.submintFail {
+  display: flex;
+  padding: 32rpx;
+  flex-direction: column;
+  align-items: center;
+  .icon {
+    &::before {
+      content: '\e6b3';
+      font-family: 'TieJia';
+      color: #ff4757;
+      font-size: 100rpx;
+    }
+  }
+  .status {
+    display: inline-block;
+    padding: 54rpx 0 24rpx 0;
+    font-size: 34rpx;
+    color: #ff4757;
+    letter-spacing: 0.3rpx;
+    text-align: center;
+    font-weight: bold;
+  }
+  .desc {
+    font-size: 34rpx;
+    color: #4a4a53;
+    letter-spacing: 0.3rpx;
+    text-align: center;
+  }
+  .modifyInfo {
+    margin-top: 90rpx;
+    padding: 20rpx 100rpx;
+    background: #3b6afb;
+    border-radius: 4rpx;
+    font-size: 34rpx;
+    color: #ffffff;
+    letter-spacing: 0.3rpx;
+    text-align: center;
+  }
+}
+.submintEd {
+  display: flex;
+  padding: 32rpx;
+  flex-direction: column;
+  align-items: center;
+  .icon {
+    &::before {
+      content: '\e681';
+      font-family: 'TieJia';
+      color: #3b6afb;
+      font-size: 120rpx;
+    }
+  }
+  .status {
+    display: inline-block;
+    padding: 44rpx 0 24rpx 0;
+    font-size: 34rpx;
+    color: #4a4a53;
+    letter-spacing: 0.3rpx;
+    text-align: center;
+    font-weight: bold;
+  }
+  .desc {
+    font-size: 34rpx;
+    color: #4a4a53;
+    letter-spacing: 0.3rpx;
+    text-align: center;
+  }
+}
+</style>
+<template>
+  <view class="authStatus">
+    <block wx:if="{{authStatus == 1}}">
+      <view class="submintEd">
+        <text class="icon"></text>
+        <text class="status">您的认证信息已提交</text>
+        <text class="desc">预计2个工作日内完成审核，请耐心等待。</text>
+      </view>
+    </block>
+    <block wx:if="{{authStatus == '-1'}}">
+      <view class="submintFail">
+        <text class="icon"></text>
+        <text class="status">抱歉，您的认证信息未能通过审核</text>
+        <text class="desc">{{reviewReason}}</text>
+        <view class="modifyInfo" @tap="changeInfo">修改认证信息</view>
+      </view>
+    </block>
+    <block wx:if="{{authStatus == 2}}">
+      <view class="submintSuccess">
+        <text class="icon"></text>
+        <text class="status">已完成实名认证，请勿发布虚假信息!</text>
+        <!-- <view class="modifyInfo">注销认证信息</view> -->
+      </view>
+    </block>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+
+export default class Index extends wepy.component {
+  props = {
+    authStatus: {
+      twoWay: true
+    },
+    reviewReason: {
+      twoWay: true
+    }
+  };
+  data = {};
+
+  computed = {};
+
+  methods = {
+    changeInfo() {
+      this.authStatus = 0;
+      this.$apply();
+    }
+  };
+
+  events = {};
+
+  onLoad() {}
+}
+</script>

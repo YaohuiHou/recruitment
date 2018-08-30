@@ -1,0 +1,305 @@
+
+  <view class="job">
+    <!-- 个人基本信息 -->
+    
+  <view class="item _0813eb0">
+    <view class="header _0813eb0">
+      <text class="span _0813eb0">个人基本信息</text>
+      <text class="icon _0813eb0" bindtap="$personalInfo$gotoLink" data-wpygotolink-a="about">问</text>
+    </view>
+    <view class="personalName _0813eb0">
+      <view class="left _0813eb0">
+        <view class="li change-li _0813eb0">
+          <text class="title _0813eb0">姓名</text>
+          <text class="dian _0813eb0">:</text>
+          <input type="text" maxlength="5" value="{{$personalInfo$personalInfo.name}}" placeholder="点击输入" data-type="name" bindblur="$personalInfo$inputFun" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;" class="_0813eb0"/>
+        </view>
+        <view class="li change-li _0813eb0">
+          <text class="title _0813eb0">电话</text>
+          <text class="dian _0813eb0">:</text>
+          <input type="number" maxlength="11" value="{{$personalInfo$personalInfo.tel}}" placeholder="点击输入" data-type="tel" bindblur="$personalInfo$inputFun" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;" class="_0813eb0"/>
+        </view>
+      </view>
+      <view class="header-phone _0813eb0">
+          <view class="close _0813eb0"  wx:if="{{$personalInfo$personalInfo.headPortrait != ''}}" bindtap="$personalInfo$deleteFun">删</view>
+        <view class="photo _0813eb0" bindtap="$personalInfo$chooseImage">
+          <text  wx:if="{{$personalInfo$personalInfo.headPortrait == ''}}" class="_0813eb0">点击上传</text>
+          <image  wx:if="{{$personalInfo$personalInfo.headPortrait != ''}}" src="{{$personalInfo$personalInfo.headPortrait}}" class="_0813eb0"/>
+        </view>
+      </view>
+    </view>
+    <view class="li change-li _0813eb0" wx:if="{{$personalInfo$VerifyCode}}">
+      <text class="title _0813eb0">验证码</text>
+      <text class="dian _0813eb0">:</text>
+      <view class="verifyContent _0813eb0">
+        <input class="verify _0813eb0" type="number" maxlength="4" value="{{$personalInfo$personalInfo.verificationCode}}" placeholder="输入验证码" data-type="verificationCode" bindblur="$personalInfo$inputFun" placeholder-style="font-size: 28rpx;color: #9EA4AF;letter-spacing: 0.17rpx;"/>
+        <block wx:if="{{$personalInfo$can}}" class="_0813eb0">
+          <view class="btn _0813eb0" bindtap="$personalInfo$getVerifyCode"><text class="_0813eb0">{{$personalInfo$verificationInfo}}</text></view>
+        </block>
+        <block wx:if="{{!$personalInfo$can}}" class="_0813eb0">
+          <view class="btn active _0813eb0"><text class="_0813eb0">{{$personalInfo$verificationInfo}}</text></view>
+        </block>
+      </view>
+    </view>
+    <view class="li change-li _0813eb0">
+      <text class="title _0813eb0">求职地点</text>
+      <text class="dian _0813eb0">:</text>
+      <view class="citys _0813eb0" bindtap="$personalInfo$gotoLink" data-wpygotolink-a="chooseCity">
+        <text class="city _0813eb0">{{$personalInfo$chooseCity.name}}</text>
+        <text class="right _0813eb0"/>
+      </view>
+    </view>
+    <view class="li require _0813eb0" wx:for="{{$personalInfo$list}}" wx:key="{{index}}" wx:for-item="itemLi">
+      <text class="title _0813eb0">{{itemLi.name}}</text>
+      <text class="dian _0813eb0">:</text>
+      <view class="jobCity _0813eb0">
+        <view class="types _0813eb0">
+          <view wx:for="{{itemLi.types}}" class="option {{item.select ? 'selected' : ''}} _0813eb0" wx:key="{{index}}" data-index="{{index}}" bindtap="$personalInfo$selecedWork">
+              <text class="name _0813eb0">{{item.name}}</text>
+          </view>
+        </view>
+        <text class="desc _0813eb0">{{itemLi.desc}}</text>
+      </view>
+    </view>
+  </view>
+    <!-- 工作经验 -->
+    
+  <view class="item _f7ec116">
+    <view class="header _f7ec116">
+      <text class="span _f7ec116">{{ !$jobDemand$loaderTitle ? '职位要求':'工作经验'}}</text>
+      <text class="icon _f7ec116"  wx:if="{{!$jobDemand$loaderTitle}}" bindtap="$jobDemand$gotoLink" data-wpygotolink-a="about">问</text>
+    </view>
+    <view class="li change-li _f7ec116" bindtap="$jobDemand$gotoLink"  wx:if="{{$jobDemand$chooseCity}}" data-wpygotolink-a="chooseCity">
+      <text class="title _f7ec116">工作地点</text>
+      <text class="dian _f7ec116">:</text>
+      <view class="citys _f7ec116">
+        <text class="city _f7ec116">{{$jobDemand$chooseCity.name}}</text>
+        <text class="right _f7ec116"/>
+      </view>
+    </view>
+    <view class="li device _f7ec116">
+      <text class="title _f7ec116">设备类型</text>
+      <text class="dian _f7ec116">:</text>
+      <view class="types _f7ec116">
+        <view class="grab _f7ec116">
+          <view  wx:for="{{$jobDemand$device.grab}}" bindtap="$jobDemand$selectFun" class="em {{item.select ? 'selected' : ''}} _f7ec116" wx:key="{{index}}" data-wpyselectfun-a="device" data-wpyselectfun-b="{{index}}">
+            <text class="name _f7ec116">{{item.name}}</text>
+            <text class="span _f7ec116">{{item.amount}}</text>
+          </view>
+        </view>
+        <view class="other _f7ec116">
+          <view class="em {{$jobDemand$device.others.type.select ? 'selected' : ''}} _f7ec116" bindtap="$jobDemand$deviceTypeSelect" data-wpydevicetypeselect-a="type">
+            <text class="name _f7ec116">{{$jobDemand$device.others.type.name}}</text>
+          </view>
+          <view class="input {{$jobDemand$device.others.input.select ? 'selected' : ''}} _f7ec116" bindtap="$jobDemand$deviceTypeSelect" data-wpydevicetypeselect-a="input">
+            <input placeholder="其他，点击输入" maxlength="8" bindinput="$jobDemand$textInput" data-type="otherDevice" value="{{$jobDemand$device.others.input.otherDeviceValue}}" class="_f7ec116"/>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="li require _f7ec116" wx:for="{{$jobDemand$list}}" wx:key="{{index}}" wx:for-item="itemLi" wx:for-index="indexItem" wx:if="{{!itemLi.show }}">
+      <text class="title _f7ec116">{{itemLi.name}}</text>
+      <text class="dian _f7ec116">:</text>
+      <view class="types _f7ec116">
+        <view wx:for="{{itemLi.types}}" bindtap="$jobDemand$selectFun" class="option {{item.select ? 'selected' : ''}} _f7ec116" wx:key="{{index}}" data-wpyselectfun-a="list" data-wpyselectfun-b="{{index}}" data-wpyselectfun-c="{{indexItem}}">
+            <text wx:if="{{item.type !== 'cutoffTime'}}" class="name _f7ec116">{{item.name}}</text>
+            <picker wx:if="{{item.type === 'cutoffTime'}}" mode="date" bindcancel="$jobDemand$removeChooseFun" bindchange="$jobDemand$bindRegionChange" value="{{$jobDemand$currentTime}}" class="_f7ec116">
+              <view class="picker _f7ec116">
+                {{$jobDemand$cutoffTime}}
+              </view>
+            </picker>
+        </view>
+      </view>
+    </view>
+  </view>
+    <!-- 加分技能 -->
+    
+  <view class="item _4994a22">
+    <view class="header _4994a22">
+      <text class="span _4994a22">加分项技能</text>
+      <!-- <text class="icon">问</text> -->
+    </view>
+    <view class="li require _4994a22"  wx:for="{{$additionTerm$list}}" wx:for-index="indexItem" wx:key="{{indexItem}}" wx:for-item="itemLi">
+      <text class="title _4994a22">{{itemLi.name}}</text>
+      <text class="dian _4994a22">:</text>
+      <view class="types _4994a22">
+        <view wx:for="{{itemLi.types}}" class="option {{item.select ? 'selected' : ''}} _4994a22" bindtap="$additionTerm$selectFun" wx:key="{{index}}" data-wpyselectfun-a="list" data-wpyselectfun-b="{{index}}" data-wpyselectfun-c="{{indexItem}}">
+            <text class="name _4994a22">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+    <!-- 薪资福利 -->
+    
+  <view class="item _abab496">
+    <view class="header _abab496">
+      <text class="span _abab496">薪资福利</text>
+    </view>
+    <view class="li _abab496">
+      <text class="title _abab496">薪资福利</text>
+      <text class="dian _abab496">:</text>
+      <view class="types _abab496">
+        <picker  wx:for="{{$welfare$welfare}}" wx:key="{{index}}" data-index="{{index}}" bindtap="$welfare$selectFun" bindchange="$welfare$bindPickerChange" disabled="{{!item.input}}" range="{{item.list}}" range-key="v" class="_abab496" data-wpyselectfun-a="welfare" data-wpyselectfun-b="{{index}}">
+          <view class="option _abab496">
+            <view class="left _abab496">
+              <text class="icon _abab496">{{item.select ? '对' : '圈'}}</text>
+              <text class="text _abab496">{{item.name}}</text>
+            </view>
+            <view class="input _abab496" wx:if="{{item.input}}">
+              <view class="picker _abab496">
+                {{item.showValue}}
+              </view>
+              <text class="price _abab496">{{item.priceType}}</text>
+            </view>
+          </view>
+        </picker>
+      </view>
+    </view>
+    <block  wx:if="{{$welfare$pageType != 'resume'}}" class="_abab496">
+      <view class="li no-fill _abab496">
+        <text class="title _abab496">更多福利</text>
+        <text class="dian _abab496">:</text>
+        <view class="types _abab496">
+          <view wx:for="{{$welfare$more}}" bindtap="$welfare$selectMoreFun" class="em {{item.select ? 'selected' : ''}} _abab496" wx:key="{{index}}" data-wpyselectmorefun-a="more" data-wpyselectmorefun-b="{{index}}">
+            <text class="name _abab496">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+    <!-- 更多信息 -->
+    <view class="item">
+      <view class="header">
+        <text class="span">更多信息<text class="hint">可选填，但可增加职位准确度，获取更多关注</text></text>
+      </view>
+    </view>
+    
+  <view class="item _a8134bd" hidden="{{showInfo}}">
+    <view class="li require _a8134bd"  wx:if="{{$moreInfo$handleType}}">
+      <text class="title _a8134bd">操作方向</text>
+      <text class="dian _a8134bd">:</text>
+      <view class="types _a8134bd">
+        <view wx:for="{{$moreInfo$handle}}" bindtap="$moreInfo$selectFun" class="option {{item.select ? 'selected' : ''}} _a8134bd" wx:key="{{index}}" data-wpyselectfun-a="handle" data-wpyselectfun-b="{{index}}">
+            <text class="name _a8134bd">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="li change-li _a8134bd" bindtap="$moreInfo$gotoLink">
+      <text class="title _a8134bd">工程类型</text>
+      <text class="dian _a8134bd">:</text>
+      <view class="citys _a8134bd">
+        <text class="city _a8134bd">{{$moreInfo$worksRelation}}</text>
+        <text class="right _a8134bd"/>
+      </view>
+    </view>
+    <block  wx:if="{{$moreInfo$pageType != 'resume'}}" class="_a8134bd">
+      <view class="li require _a8134bd">
+        <text class="title _a8134bd">工作时间</text>
+        <text class="dian _a8134bd">:</text>
+        <view class="types _a8134bd">
+          <view wx:for="{{$moreInfo$timer}}" bindtap="$moreInfo$selectFun" class="option {{item.select ? 'selected' : ''}} _a8134bd" wx:key="{{index}}" data-wpyselectfun-a="timer" data-wpyselectfun-b="{{index}}">
+              <text class="name _a8134bd">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    <view class="li job-num _a8134bd">
+      <text class="title _a8134bd">招聘人数</text>
+      <text class="dian _a8134bd">:</text>
+      <view class="types _a8134bd">
+        <view class="remove icon {{$moreInfo$jobNum <= 1 ? 'notext' : ''}} _a8134bd" bindtap="$moreInfo$removeFun">减</view>
+        <view class="number _a8134bd">{{$moreInfo$jobNum}}</view>
+        <view class="add icon _a8134bd" bindtap="$moreInfo$addFun">加</view>
+      </view>
+      </view>
+    </block>
+    <view class="li textarea-li _a8134bd">
+      <text class="title _a8134bd">{{$moreInfo$pageType != 'resume' ? '经验要求' : '更多经验'}}</text>
+      <text class="dian _a8134bd">:</text>
+      <view class="textarea _a8134bd">
+        <textarea bindinput="$moreInfo$textInput" data-type="{{ $moreInfo$pageType != 'resume' ? 'jobRequire':'workExperience'}}" placeholder="例如：可修边坡，装土要快，挖沟要直~" value="{{$moreInfo$pageType != 'resume' ? $moreInfo$jobRequire : $moreInfo$workExperience}}" maxlength="100" class="_a8134bd"/>
+      </view>
+    </view>
+    <view class="li textarea-li _a8134bd">
+      <text class="title _a8134bd">{{$moreInfo$pageType != 'resume' ? '其他福利' : '其他要求'}}</text>
+      <text class="dian _a8134bd">:</text>
+      <view class="textarea _a8134bd">
+        <textarea bindinput="$moreInfo$textInput" data-type="{{ $moreInfo$pageType != 'resume' ? 'otherWelfare':'askFor'}}" placeholder="{{$moreInfo$pageType != 'resume' ? '例如：过节有红包~' : '你不写老板怎么知道你想要啥'}}" value="{{$moreInfo$pageType != 'resume' ? $moreInfo$otherWelfare : $moreInfo$askFor}}" maxlength="100" class="_a8134bd"/>
+      </view>
+    </view>
+    <block  wx:if="{{$moreInfo$pageType != 'resume'}}" class="_a8134bd">
+      <view class="li _a8134bd">
+        <text class="title _a8134bd">工作环境</text>
+        <text class="dian _a8134bd">:</text>
+        <text class="desc _a8134bd">上传工作环境和设备照片,给求职者更多参考</text>
+      </view>
+      
+  <view class="upload _958895a _a8134bd">
+    <block  wx:if="{{$moreInfo$uploadPic$imagePath.length > 0}}" class="_958895a">
+      <block data-index="index" class="_958895a" wx:for="{{$moreInfo$uploadPic$imagePath}}" wx:for-index="$moreInfo$uploadPic$index" wx:for-item="$moreInfo$uploadPic$item" wx:key="$moreInfo$uploadPic$index">
+        <div class="imageModule _958895a">
+          <text class="progress _958895a" wx:if="{{$moreInfo$uploadPic$progressArr[$moreInfo$uploadPic$index] && $moreInfo$uploadPic$progressArr[$moreInfo$uploadPic$index] < 100}}">{{$moreInfo$uploadPic$progressArr[$moreInfo$uploadPic$index]}}%</text>
+          <image mode="aspectFill" src="{{$moreInfo$uploadPic$item}}" bindtap="$moreInfo$uploadPic$videoFilePlay" class="_958895a" data-wpyvideofileplay-a="{{$moreInfo$uploadPic$index}}"/>
+          <!-- <video wx:if="{{type == 'resume'}}" src="{{item}}" controls></video> -->
+          <text class="close _958895a" wx:if="{{$moreInfo$uploadPic$progressArr[$moreInfo$uploadPic$index] == 100}}" bindtap="$moreInfo$uploadPic$deleteFun" data-wpydeletefun-a="{{$moreInfo$uploadPic$index}}">删</text>
+        </div>
+      </block>
+    </block>
+    <div class="chooseImgBtn _958895a"  wx:if="{{$moreInfo$uploadPic$imagePath.length < 6}}" bindtap="$moreInfo$uploadPic$chooseImage">
+      <text class="_958895a">点击上传{{$moreInfo$uploadPic$pageType}}</text>
+    </div>
+    <!-- 视频 -->
+    <view class="video _958895a" bindtap="$moreInfo$uploadPic$hideVideo"  wx:if="{{$moreInfo$uploadPic$hideVideoView}}">
+      <video src="{{$moreInfo$uploadPic$videoSrc}}" objectFit="fill" controls autoplay class="_958895a"/>
+    </view>
+  </view>
+    </block>
+    <block wx:if="{{$moreInfo$pageType == 'resume'}}" class="_a8134bd">
+      <view class="li video _a8134bd">
+        <view class="videoItem _a8134bd">
+          <text class="title _a8134bd">工作视频</text>
+          <text class="dian _a8134bd">:</text>
+        </view>
+        <text class="desc _a8134bd">上传操作视频更容易找到工作哦，最多可传6个，每个最长1分钟</text>
+      </view>
+      
+  <view class="upload _958895a _a8134bd">
+    <block  wx:if="{{$moreInfo$uploadPic$imagePath.length > 0}}" class="_958895a">
+      <block data-index="index" class="_958895a" wx:for="{{$moreInfo$uploadPic$imagePath}}" wx:for-index="$moreInfo$uploadPic$index" wx:for-item="$moreInfo$uploadPic$item" wx:key="$moreInfo$uploadPic$index">
+        <div class="imageModule _958895a">
+          <text class="progress _958895a" wx:if="{{$moreInfo$uploadPic$progressArr[$moreInfo$uploadPic$index] && $moreInfo$uploadPic$progressArr[$moreInfo$uploadPic$index] < 100}}">{{$moreInfo$uploadPic$progressArr[$moreInfo$uploadPic$index]}}%</text>
+          <image mode="aspectFill" src="{{$moreInfo$uploadPic$item}}" bindtap="$moreInfo$uploadPic$videoFilePlay" class="_958895a" data-wpyvideofileplay-a="{{$moreInfo$uploadPic$index}}"/>
+          <!-- <video wx:if="{{type == 'resume'}}" src="{{item}}" controls></video> -->
+          <text class="close _958895a" wx:if="{{$moreInfo$uploadPic$progressArr[$moreInfo$uploadPic$index] == 100}}" bindtap="$moreInfo$uploadPic$deleteFun" data-wpydeletefun-a="{{$moreInfo$uploadPic$index}}">删</text>
+        </div>
+      </block>
+    </block>
+    <div class="chooseImgBtn _958895a"  wx:if="{{$moreInfo$uploadPic$imagePath.length < 6}}" bindtap="$moreInfo$uploadPic$chooseImage">
+      <text class="_958895a">点击上传{{$moreInfo$uploadPic$pageType}}</text>
+    </div>
+    <!-- 视频 -->
+    <view class="video _958895a" bindtap="$moreInfo$uploadPic$hideVideo"  wx:if="{{$moreInfo$uploadPic$hideVideoView}}">
+      <video src="{{$moreInfo$uploadPic$videoSrc}}" objectFit="fill" controls autoplay class="_958895a"/>
+    </view>
+  </view>
+    </block>
+  </view>
+    <view class="more-button {{showInfo ? '' : 'show'}}" bindtap="showMoreInfo">
+      <text>{{buttonHint}}</text>
+    </view>
+    
+  <view class="item _c9602d6">
+    <view class="header _c9602d6">
+      <text class="span _c9602d6">{{$jobWanted$statusType.title}}</text>
+      <!-- <text class="icon">问</text> -->
+    </view>
+    <view class="li require _c9602d6">
+      <view class="types _c9602d6">
+        <view  wx:for="{{$jobWanted$statusType.types}}" bindtap="$jobWanted$selectFun" class="option {{item.select ? 'selected' : ''}} _c9602d6" wx:key="{{index}}" data-wpyselectfun-a="{{index}}">
+            <text class="name _c9602d6">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+    <view class="submit" bindtap="submitFun">确认发布</view>
+    <text class="hint-title">发布成功后您可以到【我的-我的发布】中查看发布的简历</text>
+  </view>

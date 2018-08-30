@@ -1,0 +1,505 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span">{{ !loaderTitle ? '职位要求':'工作经验'}}</text>
+      <text class="icon" wx:if="{{!loaderTitle}}" @tap="gotoLink('about')">问</text>
+    </view>
+    <view class="li change-li" @tap="gotoLink('chooseCity')" wx:if="{{chooseCity}}">
+      <text class="title">工作地点</text>
+      <text class="dian">:</text>
+      <view class="citys">
+        <text class="city">{{chooseCity.name}}</text>
+        <text class="right"></text>
+      </view>
+    </view>
+    <view class="li device">
+      <text class="title">设备类型</text>
+      <text class="dian">:</text>
+      <view class="types">
+        <view class="grab">
+          <view wx:for="{{device.grab}}" @tap="selectFun('device','{{index}}')" class="em {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+            <text class="name">{{item.name}}</text>
+            <text class="span">{{item.amount}}</text>
+          </view>
+        </view>
+        <view class="other">
+          <view class="em {{device.others.type.select ? 'selected' : ''}}" @tap="deviceTypeSelect('type')">
+            <text class="name">{{device.others.type.name}}</text>
+          </view>
+          <view class="input {{device.others.input.select ? 'selected' : ''}}" @tap="deviceTypeSelect('input')">
+            <input placeholder="其他，点击输入" maxlength="8"  bindinput="textInput" data-type="otherDevice" value="{{device.others.input.otherDeviceValue}}"/>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="li require"
+      wx:for="{{list}}"
+      wx:key="{{index}}"
+      wx:for-item="itemLi"
+      wx:for-index="indexItem"
+      wx:if="{{!itemLi.show }}"
+    >
+      <text class="title">{{itemLi.name}}</text>
+      <text class="dian">:</text>
+      <view class="types">
+        <view wx:for="{{itemLi.types}}"  @tap="selectFun('list','{{index}}','{{indexItem}}')" class="option {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+            <text wx:if="{{item.type !== 'cutoffTime'}}" class="name">{{item.name}}</text>
+            <picker wx:if="{{item.type === 'cutoffTime'}}" mode="date" bindcancel="removeChooseFun" bindchange="bindRegionChange" value="{{currentTime}}">
+              <view class="picker">
+                {{cutoffTime}}
+              </view>
+            </picker>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy'
+import mixin from '../mixins'
+export default class Index extends wepy.component {
+  props = {
+    chooseCity: {},
+    loaderTitle: {},
+    editorDataObject: {
+      twoWay: true
+    }
+  }
+  mixins = [mixin]
+  watch = {
+    editorDataObject() {
+      // 添加详情数据
+      this.newEditorData()
+    }
+  }
+  data = {
+    device: {
+      grab: [
+        {
+          name: '小挖',
+          amount: '13吨以下',
+          value: 2,
+          type: 'driverType'
+        },
+        {
+          name: '中挖',
+          amount: '13-25吨',
+          value: 3,
+          type: 'driverType'
+        },
+        {
+          name: '大挖',
+          amount: '25吨以上',
+          value: 4,
+          type: 'driverType'
+        }
+      ],
+      others: {
+        type: {
+          name: '装载机',
+          select: false,
+          value: 5,
+          type: 'driverType'
+        },
+        input: {
+          otherDeviceValue: '',
+          value: 99,
+          select: false,
+          type: 'driverType',
+          moreType: 'otherDevice'
+        }
+      }
+    },
+    // 其他
+    list: [
+      {
+        name: '破碎锤',
+        show: true,
+        types: [
+          {
+            name: '不限',
+            select: false,
+            value: 1,
+            type: 'useHammerFlag'
+          },
+          {
+            name: '会使用',
+            value: 2,
+            type: 'useHammerFlag'
+          }
+        ]
+      },
+      {
+        name: '驾龄要求',
+        types: [
+          {
+            name: '不限',
+            value: 1,
+            type: 'drivingYears'
+          },
+          {
+            name: '1年以上',
+            select: false,
+            value: 2,
+            type: 'drivingYears'
+          },
+          {
+            name: '3年以上',
+            value: 3,
+            type: 'drivingYears'
+          },
+          {
+            name: '5年以上',
+            value: 4,
+            type: 'drivingYears'
+          }
+        ]
+      }
+    ],
+    cutoffTime: '选择日期'
+  }
+  onLoad() {
+    // 简历 职位发布 区分
+    if (!this.loaderTitle) {
+      this.list.push({
+        name: '招聘实效',
+        types: [
+          {
+            name: '长期有效',
+            select: false,
+            value: 1,
+            type: 'longTime'
+          },
+          {
+            name: '选择日期',
+            value: '选择日期',
+            type: 'cutoffTime'
+          }
+        ]
+      })
+      this.$apply()
+    }
+  }
+
+  methods = {
+    // 点击选中
+    selectFun(type, index, indexItem) {
+      let typeArr
+      if (type === 'device') {
+        // 设备
+        typeArr = this.device.grab
+        this.device.others.type.select = false
+        this.device.others.input.select = false
+        // 破碎锤
+        this.list[0].show = false
+        // 清空输入项
+        this.$emit('editorData', 'otherDevice', '')
+      } else {
+        typeArr = this.list[indexItem].types
+      }
+
+      typeArr.forEach((element, i) => {
+        element.select = false
+        if (i === index) {
+          element.select = true
+        }
+      })
+      this.$apply()
+      this.$emit('editorData', typeArr[index].type, typeArr[index].value)
+    },
+    // 设备选择
+    deviceTypeSelect(type) {
+      this.device.others.type.select = false
+      this.device.others.input.select = false
+      this.device.grab.forEach((element, i) => {
+        element.select = false
+      })
+      this.device.others[type].select = true
+      this.$emit(
+        'editorData',
+        this.device.others[type].type,
+        this.device.others[type].value
+      )
+
+      //破碎锤
+      this.list[0].show = true
+      this.$apply()
+    },
+    // 选择时间
+    bindRegionChange(e) {
+      this.cutoffTime = e.detail.value
+      let timer = Date.parse(new Date(this.cutoffTime)) / 1000
+      this.$emit('editorData', 'cutoffTime', timer)
+      this.$emit('editorData', 'longTime', '')
+      this.$apply()
+    },
+    // 取消选时间
+    removeChooseFun() {
+      if (this.list[2].types[1].name === this.cutoffTime) {
+        this.list[2].types[1].select = false
+        this.$emit('editorData', this.list[2].types[1].type, '')
+        this.$apply()
+      }
+    },
+    // 输入
+    textInput(e) {
+      let content = e.detail.value
+      let type = e.target.dataset.type
+      this.$emit('editorData', type, content)
+    },
+    gotoLink(type) {
+      wepy.navigateTo({
+        url: `/pages/${type}`
+      })
+    }
+  }
+
+  // 编辑数据
+  newEditorData() {
+    // 设备类型
+    let deviceVal = Number(this.editorDataObject.driverType)
+    switch (deviceVal) {
+      case 2:
+      case 3:
+      case 4:
+        // 挖机
+        this.device.others.type.select = false
+        this.device.others.input.select = false
+        this.device.grab[deviceVal - 2].select = true
+        // 破碎机
+        this.list[0].show = false
+        this.list[0].types.forEach((element, i) => {
+          element.select = false
+          if (this.editorDataObject.useHammerFlag - 1 == i) {
+            element.select = true
+          }
+        })
+        this.device.others.input.otherDeviceValue = ''
+        break
+      case 5:
+        // 装载机
+        this.device.others.type.select = true
+        this.device.others.input.select = false
+        break
+      default:
+        // 其他
+        this.device.others.type.select = false
+        this.device.others.input.select = true
+        this.device.others.input.otherDeviceValue = this.editorDataObject.otherDevice
+        break
+    }
+    // 驾龄要求
+    this.list[1].types[this.editorDataObject.drivingYears - 1].select = true
+
+    // 招聘时效
+    if (!this.loaderTitle) {
+      if (this.editorDataObject.longTime == 1) {
+        this.list[this.list.length - 1].types[0].select = true
+      } else {
+        this.cutoffTime = this.getCurrentDate(this.editorDataObject.cutoffTime)
+      }
+    }
+
+    this.$apply()
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  .li {
+    &.change-li {
+      border-bottom: 1rpx solid rgba(220, 226, 238, 0.6);
+      padding: 26rpx 0;
+      margin-bottom: 50rpx;
+      .title {
+        line-height: 40rpx;
+        &:before {
+          line-height: 40rpx;
+        }
+      }
+      .citys {
+        display: flex;
+        justify-content: space-between;
+        flex-grow: 1;
+        align-items: center;
+        text {
+          font-size: 32rpx;
+          color: #4a4a53;
+          line-height: 40rpx;
+        }
+        .right {
+          display: block;
+          transform: rotate(45deg);
+          border-top: 3rpx solid #bdc1c9;
+          border-right: 3rpx solid #bdc1c9;
+          width: 14rpx;
+          height: 14rpx;
+        }
+      }
+    }
+    &.device {
+      padding-bottom: 20rpx;
+      .title,
+      .dian {
+        height: 68rpx;
+        line-height: 68rpx;
+      }
+      .types {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        .grab {
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          margin-bottom: 20rpx;
+          .em {
+            flex: 1;
+            margin-right: 12rpx;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            &:last-child {
+              margin: 0;
+            }
+            &.selected {
+              transition: all 0.4s linear;
+              background: rgba(59, 106, 251, 0.08);
+              border-color: rgba(59, 106, 251, 0.7);
+              text {
+                color: #3b6afb;
+                font-weight: bold;
+              }
+            }
+            text {
+              display: block;
+            }
+            .name {
+              font-size: 24rpx;
+              line-height: 32rpx;
+              color: #4a4a53;
+            }
+            .span {
+              font-size: 20rpx;
+              color: #9ea4af;
+            }
+          }
+        }
+        .other {
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          .em {
+            margin-right: 12rpx;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            width: calc(~'33% - 12rpx');
+            justify-content: center;
+            flex-shrink: 0;
+            .name {
+              font-size: 24rpx;
+              color: #4a4a53;
+            }
+            &.selected {
+              transition: all 0.4s linear;
+              background: rgba(59, 106, 251, 0.08);
+              border-color: rgba(59, 106, 251, 0.7);
+              text {
+                color: #3b6afb;
+                font-weight: bold;
+              }
+            }
+          }
+          .input {
+            flex-grow: 1;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            height: 68rpx;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            justify-content: center;
+            &.selected {
+              transition: all 0.4s linear;
+              background: rgba(59, 106, 251, 0.08);
+              border-color: rgba(59, 106, 251, 0.7);
+              input {
+                color: #3b6afb;
+                font-weight: bold;
+              }
+            }
+            input {
+              color: #6a6a77;
+              font-size: 24rpx;
+              text-align: center;
+            }
+          }
+        }
+      }
+    }
+    &.require {
+      padding: 20rpx 0;
+      .title,
+      .dian {
+        height: 68rpx;
+        line-height: 68rpx;
+      }
+      .types {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-grow: 1;
+        .option {
+          flex: 1;
+          margin-right: 12rpx;
+          border: 1rpx solid rgba(189, 193, 201, 0.7);
+          border-radius: 4rpx;
+          height: 68rpx;
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          justify-content: center;
+          &.selected {
+            transition: all 0.4s linear;
+            background: rgba(59, 106, 251, 0.08);
+            border-color: rgba(59, 106, 251, 0.7);
+            text,
+            .picker {
+              color: #3b6afb;
+              font-weight: bold;
+            }
+          }
+          &:last-child {
+            margin: 0;
+          }
+          picker {
+            display: block;
+            width: 100%;
+            height: 68rpx;
+          }
+          .name,
+          .picker {
+            width: 100%;
+            height: 68rpx;
+            line-height: 68rpx;
+            text-align: center;
+            font-size: 24rpx;
+            color: #4a4a53;
+          }
+        }
+      }
+    }
+  }
+}
+</style>

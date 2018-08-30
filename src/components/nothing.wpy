@@ -1,0 +1,43 @@
+ <template>
+  <view class="nothing">
+    <image src="https://bbs.cehome.com/wxApp/v.2/nothing.png"/>
+    <text>{{isDataDesc}}~</text>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy';
+export default class Index extends wepy.component {
+  props = {
+    isDataDesc: {
+      twoWay: true
+    }
+  };
+  data = {};
+  onShow() {}
+  methods = {};
+}
+</script>
+
+<style lang="less" scoped>
+.nothing {
+  height: 340rpx;
+  display: block;
+  margin: 100rpx auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  image {
+    width: 288rpx;
+    height: 288rpx;
+    margin: 0 auto;
+  }
+  text {
+    margin-top: 30rpx;
+    color: #888;
+    font-size: 28rpx;
+  }
+}
+</style>

@@ -1,0 +1,366 @@
+ <template>
+  <view class="upload">
+    <block wx:if="{{imagePath.length > 0}}">
+      <repeat for="{{imagePath}}" key="index" data-index="index" item="item">
+        <div class="imageModule">
+          <text class="progress" wx:if="{{progressArr[index] && progressArr[index] < 100}}">{{progressArr[index]}}%</text>
+          <image mode="aspectFill" src="{{item}}"  @tap="videoFilePlay('{{index}}')"/>
+          <!-- <video wx:if="{{type == 'resume'}}" src="{{item}}" controls></video> -->
+          <text class="close" wx:if="{{progressArr[index] == 100}}" @tap="deleteFun('{{index}}')">删</text>
+        </div>
+      </repeat>
+    </block>
+    <div class="chooseImgBtn" wx:if="{{imagePath.length < 6}}" @tap="chooseImage">
+      <text>点击上传{{pageType}}</text>
+    </div>
+    <!-- 视频 -->
+    <view class="video" @tap="hideVideo" wx:if="{{hideVideoView}}">
+      <video src="{{videoSrc}}" objectFit="fill" controls autoplay></video>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy'
+import request from '../common/request.js'
+const VodUploader = require('../utils/vod-web-sdk-v5')
+
+export default class Index extends wepy.component {
+  props = {
+    type: {
+      twoWay: true
+    },
+    imagePaths: {
+      twoWay: true
+    },
+    videoPaths: {
+      twoWay: true
+    }
+  }
+  data = {
+    submitFunDisabled: false,
+    imagePath: [],
+    // 进度
+    progressArr: [],
+    // 上传
+    // 图片
+    imgUrls: [],
+    // 视频
+    videoUrls: [],
+    // 视频地址
+    videoSrc: '',
+    // 视频控件展示
+    hideVideoView: false,
+    imgLength: 6
+  }
+
+  watch = {
+    imagePaths() {
+      // 添加详情数据
+      if (this.type == 'resume') {
+        this.imagePath = this.imagePaths
+        this.videoUrls = this.videoPaths
+      } else {
+        this.imagePath = this.imagePaths
+      }
+      this.addProgress()
+      this.$apply()
+    },
+    // 提交
+    submitFunDisabled() {
+      this.$emit('submitDisabledFun', this.submitFunDisabled)
+    }
+  }
+
+  onLoad() {}
+  methods = {
+    // 播放视频 | 预览图片
+    videoFilePlay(index) {
+      if (this.type == 'resume') {
+        this.hideVideoView = true
+        this.videoSrc = this.videoUrls[index]
+        this.$apply()
+      } else {
+        wx.previewImage({
+          current: this.imagePath[index], // 当前显示图片的http链接
+          urls: this.imagePath // 需要预览的图片http链接列表
+        })
+      }
+    },
+    // 隐藏视频
+    hideVideo() {
+      this.hideVideoView = false
+      this.$apply()
+    },
+    // 删除
+    deleteFun(index) {
+      this.imagePath.splice(index, 1)
+      this.progressArr.splice(index, 1)
+
+      if (this.type == 'resume') {
+        this.videoUrls.splice(index, 1)
+        this.$emit('upVideos', this.videoUrls, this.imagePath)
+      } else {
+        this.imgUrls.splice(index, 1)
+        this.$emit('upimages', 'sitePhoto', this.imgUrls)
+      }
+      this.$apply()
+    },
+    // 上传
+    chooseImage() {
+      if (this.type == 'resume') {
+        // 上传视频
+        wx.chooseVideo({
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          compressed: true,
+          maxDuration: 60,
+          success: res => {
+            this.submitFunDisabled = true
+            let tempFilePath = res.tempFilePath
+            // 缩略图
+            let thumbTempFilePath = res.thumbTempFilePath
+              ? res.thumbTempFilePath
+              : 'https://imgproduct.cehome.com/170518/8288c729c20deb3bb0e06ebcb0538f09.jpg'
+            let fileName = tempFilePath.substr(
+              tempFilePath.lastIndexOf('/') + 1
+            )
+            if (this.imagePath.length > 6) {
+              this.$parent.$parent.$parent.methods.showToast(
+                '最多只能上传6个视频'
+              )
+              return
+            } else {
+              this.imagePath.push(thumbTempFilePath)
+            }
+            // this.getVideoSignature(res, fileName, this.imagePath)
+            wx.showLoading({
+              title: '上传视频'
+            })
+            this.upVideoFun(res, fileName, this.imagePath)
+
+            this.$apply()
+          },
+          fail: err => {
+            this.$parent.$parent.$parent.methods.showToast(
+              '图片格式有误，请重新选择'
+            )
+          }
+        })
+      } else {
+        wx.chooseImage({
+          count: this.imgLength, // 默认9
+          sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: res => {
+            this.submitFunDisabled = true
+            // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
+            var tempFilePaths = res.tempFilePaths
+            if (tempFilePaths.length + this.imagePath.length > 6) {
+              this.$parent.$parent.$parent.methods.showToast(
+                '最多只能上传6张图片'
+              )
+              return
+            } else {
+              this.imagePath = [...this.imagePath, ...tempFilePaths]
+            }
+            tempFilePaths.forEach(element => {
+              this.upImageFun(element)
+            })
+
+            this.$apply()
+          }
+        })
+      }
+    }
+  }
+
+  // 添加进度
+  addProgress() {
+    this.progressArr = []
+    this.imagePath.forEach((e, i) => {
+      this.progressArr[i] = 100
+    })
+    this.imgLength = 6 - this.imagePath.length
+    this.$apply()
+  }
+  // 获取签名
+  getVideoSignature(callback) {
+    wx.request({
+      url: request.Api.gitFileSidnature(),
+      success: res => {
+        if (res.data.ret == '0') {
+          callback(res.data.data.signature)
+        }
+      }
+    })
+  }
+
+  // 上传图片
+  upImageFun(tempFilePaths) {
+    let num = this.imagePath.length - 1
+    this.progressArr[num] = 0.01
+    const uploadTask = wepy.uploadFile({
+      url: request.Api.upImageFile(),
+      filePath: tempFilePaths,
+      name: 'file',
+      header: request.getHeaderData(),
+      complete: res => {
+        var data = JSON.parse(res.data)
+        this.submitFunDisabled = false
+        this.$apply()
+        if (data.ret == '0') {
+          // 保存
+          this.imgUrls.push(data.data)
+          this.$emit('upimages', 'sitePhoto', this.imgUrls)
+          this.addProgress()
+        } else {
+          wepy.showToast({
+            icon: 'none',
+            title: '网络问题，请重新上传~',
+            duration: 1500
+          })
+        }
+      }
+    })
+
+    // 进度
+    uploadTask.onProgressUpdate(res => {
+      this.progressArr[num] = res.progress
+      this.$apply()
+    })
+  }
+
+  // 上传视频
+  upVideoFun(file, fileName, imagePath) {
+    let num = imagePath.length - 1
+    this.progressArr[num] = 1
+    VodUploader.start({
+      videoFile: file, //必填，把chooseVideo回调的参数(file)传进来
+      fileName: fileName, //选填，视频名称，强烈推荐填写(如果不填，则默认为“来自微信小程序”)
+      getSignature: this.getVideoSignature, //必填，获取签名的函数
+      success: result => {
+        // 保存
+        this.videoUrls.push(result.Location)
+        this.$emit('upVideos', this.videoUrls, imagePath)
+        wx.hideLoading()
+        this.submitFunDisabled = false
+        this.$apply()
+      },
+      error: result => {
+        this.progressArr.splice(num, 1)
+        this.imagePath.splice(num, 1)
+        this.$apply()
+        wx.showToast({
+          title: '上传失败',
+          icon: 'none',
+          duration: 1500
+        })
+        this.submitFunDisabled = false
+        this.$apply()
+      },
+      progress: result => {
+        this.progressArr[num] = result.percent * 100
+        this.$apply()
+      },
+      finish: result => {
+        wx.showToast({
+          title: '上传成功',
+          duration: 1200
+        })
+      }
+    })
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.upload {
+  display: flex;
+  padding-bottom: 60rpx;
+  flex-wrap: wrap;
+  align-content: stretch;
+  .imageModule {
+    width: 218rpx;
+    height: 296rpx;
+    margin-bottom: 20rpx;
+    margin-right: 20rpx;
+    position: relative;
+    &:nth-of-type(3n) {
+      margin-right: 0;
+    }
+    .progress {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-align: center;
+      line-height: 296rpx;
+      font-size: 28rpx;
+    }
+    .close {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 60rpx;
+      height: 60rpx;
+      line-height: 60rpx;
+      text-align: center;
+      border-radius: 50%;
+      border: 1rpx solid #fff;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 24rpx;
+      font-family: 'TieJia';
+    }
+    image,
+    video {
+      width: 218rpx;
+      height: 296rpx;
+      margin-bottom: 10rpx;
+    }
+  }
+  .chooseImgBtn {
+    width: 218rpx;
+    height: 296rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f3f3f3;
+    text {
+      text-align: center;
+      font-size: 28rpx;
+      color: #999999;
+      &::before {
+        content: '\4f20';
+        display: block;
+        margin-bottom: 50rpx;
+        font-family: 'TieJia';
+        font-size: 70rpx;
+        color: #3b6afb;
+        line-height: 34rpx;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+.video {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 1);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  video {
+    width: 100%;
+  }
+}
+</style>

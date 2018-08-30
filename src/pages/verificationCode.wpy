@@ -1,0 +1,376 @@
+<template>
+  <view class="container">
+    <text class="title">输入验证码</text>
+    <text class="desc">已发送4位验证码到 {{mobile}}</text>
+    <view class="inputGroup" @tap="IsFouce">
+      <input type="number" focus="{{isFouce}}" value="{{newValue}}" @blur="notFocus" maxlength="4" data-index="0" bindinput="inputChange"/>
+      <view class="{{length == 0 ? 'inputActive' : 'inputActiveEd'}}" data-index="0" @tap="itemTap">
+        <text>{{inputVal[0]}}</text>
+      </view>
+      <view class="{{length == 1 ? 'inputActive' : 'inputActiveEd'}}" data-index="1" @tap="itemTap">
+        <text>{{inputVal[1]}}</text>
+      </view>
+      <view class="{{length == 2 ? 'inputActive' : 'inputActiveEd'}}" data-index="2" @tap="itemTap">
+        <text>{{inputVal[2]}}</text>
+      </view>
+      <view class="{{length == 3 ? 'inputActive' : 'inputActiveEd'}}" data-index="3" @tap="itemTap">
+        <text>{{inputVal[3]}}</text>
+      </view>
+    </view>
+    <text class="resend {{can ? 'can' : 'cant'}}" @tap="send('{{can}}')">{{verificationInfo}}</text>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { connect } from 'wepy-redux';
+import { login } from '../store/actions';
+import request from '../common/request.js';
+import { nowDate } from '../utils/utils.js';
+
+@connect(
+  {
+    state(state) {
+      return state;
+    }
+  },
+  {
+    login
+  }
+)
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: ''
+  };
+  components = {};
+
+  // mixins = [mixins];
+
+  data = {
+    mobile: '',
+    inputVal: [],
+    newValue: '',
+    length: 0,
+    time: 60,
+    timer: null,
+    isFouce: true,
+    textIndex: 0,
+    verificationInfo: '',
+    can: false,
+    verifyCode: '',
+    Seconds: ''
+  };
+  watch = {
+    Seconds() {
+      if (this.time < 0) {
+        this.verificationInfo = '点击重新发送验证码';
+        this.can = true;
+        this.time = 60;
+        this.$apply();
+        return;
+      } else {
+        this.verificationInfo = '重新发送 ' + '( ' + this.time + 's' + ' )';
+        this.can = false;
+        this.time--;
+      }
+      let timer = setTimeout(() => {
+        this.getNowFormatDate();
+        clearTimeout(timer);
+      }, 1000);
+      this.$apply();
+    }
+  };
+  methods = {
+    send(can) {
+      if (can) {
+        this.getNowFormatDate();
+        this.phoneRegister(this.mobile);
+      } else {
+      }
+    },
+    inputChange(e) {
+      var index = e.currentTarget.dataset.index;
+      var value = e.detail.value.replace(/ /g, '');
+      this.length = e.detail.value.length;
+
+      this.inputVal = value.split('');
+      if (this.length === 4) {
+        if (this.verifyCode == value) {
+          this.checkVerificationCode(value);
+        } else {
+          this.$parent.methods.showToast('验证码输入错误~');
+        }
+      }
+      this.$apply();
+    },
+    IsFouce() {
+      this.isFouce = true;
+      this.$apply();
+    },
+    notFocus() {
+      this.isFouce = false;
+      this.$apply();
+    },
+    itemTap(e) {
+      var index = e.currentTarget.dataset.index;
+      this.textIndex = index;
+    },
+    submit() {
+      var verifyCode = this.inputVal;
+    }
+  };
+  events = {};
+  checkVerificationCode(value) {
+    this.$parent.methods.showLoading('正在登陆...');
+    var params = {};
+
+    if (wx.getStorageSync('submitParams')) {
+      params = wx.getStorageSync('submitParams');
+    }
+
+    request
+      .cehomeRequest(
+        request.Api.registerLoginByMobileVC(),
+        Object.assign(
+          {
+            mobile: this.mobile,
+            vc: value
+            // wxUnionid: 'oaXhKs3fSFyYgxs9jtbuRCKFAfgE'
+          },
+          params
+        ),
+        'POST',
+        this
+      )
+      .then(res => {
+        if (res.statusCode == 200 && res.data.ret == 0) {
+          this.methods.login(res.data.data);
+          wx.setStorageSync(
+            'loginInfo',
+            Object.assign(res.data.data, { registerTime: nowDate(new Date()), isPopup: true})
+          );
+          wx.setStorageSync(
+            'isPopup',
+            { registerTime: nowDate(new Date()), isPopup: true}
+          );
+          this.time = 0;
+          wx.navigateBack({
+            delta: 2
+          });
+          this.$parent.methods.hideLoading();
+        } else {
+          this.time = 0;
+          setTimeout(() => {
+            wx.navigateBack({
+              delta: 1
+            });
+          }, 2000);
+          this.$parent.methods.showToast(res.data.msg);
+        }
+      })
+      .catch(err => {
+        if (err.errMsg == 'request:fail timeout') {
+          this.$parent.methods.showToast('网络请求超时~');
+        } else {
+          this.$parent.methods.showToast('网络好像有问题，请检查网络~');
+        }
+      });
+  }
+  phoneRegister(mobile) {
+    request
+      .cehomeRequest(
+        request.Api.sendVCOfRegisterLogin(),
+        { mobile: mobile },
+        'POST',
+        this
+      )
+      .then(res => {
+        if (res.statusCode == 200) {
+          this.verifyCode = res.data.data;
+        } else {
+          this.methods.showToast('网络好像有问题，请检查网络~');
+        }
+      })
+      .catch(err => {
+        if (err.errMsg == 'request:fail timeout') {
+          this.methods.showToast('网络请求超时~');
+        } else {
+          this.methods.showToast('网络好像有问题，请检查网络~');
+        }
+      });
+  }
+
+  // 获取时间
+  getNowFormatDate() {
+    var date = new Date();
+    let Hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
+    let Minutes =
+      date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
+    let Seconds =
+      date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+    this.Seconds = Seconds;
+
+    this.$apply();
+  }
+  onLoad(options) {
+    this.phoneRegister(options.mobile);
+    this.mobile = options.mobile;
+    this.getNowFormatDate();
+  }
+  onShow() {}
+}
+</script>
+
+<style lang="less" scoped>
+.container {
+  padding: 40rpx 63rpx 0 63rpx;
+  .resend {
+    font-size: 30rpx;
+    letter-spacing: 0.4rpx;
+    text-align: center;
+  }
+  .can {
+    color: #3b6afb;
+  }
+  .cant {
+    color: #9ea4af;
+  }
+  .desc {
+    display: flex;
+    width: 100%;
+    margin-top: 15rpx;
+    justify-content: flex-start;
+    font-size: 28rpx;
+    color: #6a6a77;
+    letter-spacing: 0.37rpx;
+  }
+  .title {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    font-size: 44rpx;
+    color: #2d2d33;
+    letter-spacing: 0.59rpx;
+  }
+  .btnActive {
+    background: #3b6afb;
+    text {
+      color: #ffffff;
+    }
+  }
+  .default {
+    background: rgba(59, 106, 251, 0.4);
+    text {
+      color: #ffffff;
+    }
+  }
+  .btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 615rpx;
+    height: 92rpx;
+
+    border-radius: 4rpx;
+    text {
+      font-size: 32rpx;
+      letter-spacing: 0.43rpx;
+      text-align: center;
+    }
+  }
+  .inputGroup {
+    position: relative;
+    display: flex;
+    width: 100%;
+    padding: 20rpx 0;
+    justify-content: center;
+    margin: 55rpx 0 40rpx 0;
+    .inputActiveEd {
+      text {
+        position: relative;
+        display: inline-block;
+        &:before {
+          position: absolute;
+          top: 0;
+          left: 10rpx;
+          content: '';
+          width: 2rpx;
+          height: 36rpx;
+          background-color: #ffffff;
+        }
+      }
+    }
+    .inputActive {
+      text {
+        position: relative;
+        display: inline-block;
+        &::after {
+          position: absolute;
+          bottom: 0;
+          left: 10rpx;
+          content: '';
+          width: 2rpx;
+          height: 62rpx;
+          background-color: #486cdc;
+          animation: activeD 1s infinite;
+        }
+      }
+    }
+    input {
+      position: absolute;
+      left: -500%;
+      // bottom: 20rpx;
+      display: inline-block;
+      width: 100%;
+      // box-sizing: content-box;
+      justify-content: center;
+      text-align: center;
+      margin-bottom: 20rpx;
+      font-size: 44rpx;
+      color: #4a4a53;
+      font-weight: bold;
+      background-color: rgba(0, 0, 0, 0);
+    }
+    :nth-child(2) {
+      margin-right: 52rpx;
+    }
+    :nth-child(3) {
+      margin-right: 52rpx;
+    }
+    :nth-child(4) {
+      margin-right: 52rpx;
+    }
+    view {
+      flex: 1;
+      // width: 120rpx;
+      border-bottom: 1rpx solid #dce2ee;
+      display: flex;
+      flex-direction: row;
+      // .gb {
+      //   width: 2rpx;
+      //   height: 62rpx;
+      //   background-color: red;
+      // }
+      text {
+        display: flex;
+        width: 100%;
+        height: 62rpx;
+        justify-content: center;
+        text-align: center;
+        margin-bottom: 20rpx;
+        font-size: 44rpx;
+        color: #4a4a53;
+        font-weight: bold;
+      }
+    }
+  }
+}
+@keyframes activeD {
+  0% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: #486cdc;
+  }
+}
+</style>

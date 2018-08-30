@@ -1,0 +1,14 @@
+
+  <view class="container _d44cd91">
+    <text class="title _d44cd91">手机快捷登录</text>
+    <view class="inputGroup _d44cd91">
+      <input type="number" focus maxlength="11" value="{{inputVal}}" bindinput="phoneChange" class="_d44cd91"/>
+      <text class="icon _d44cd91" bindtap="deleteVal"/>
+    </view>
+    <block  wx:if="{{inputVal == ''}}" class="_d44cd91">
+      <view class="btn default _d44cd91"><text class="_d44cd91">下一步</text></view>
+    </block>
+    <block  wx:if="{{inputVal != ''}}" class="_d44cd91">
+      <view class="btn btnActive _d44cd91" bindtap="submit"><text class="_d44cd91">下一步</text></view>
+    </block>
+  </view>

@@ -1,0 +1,100 @@
+
+  <view class="listPage _6e2c23b">
+    <scroll-view class="content _6e2c23b" scroll-y bindscrolltolower="onBottom">
+    <block  wx:for="{{listData}}" wx:for-index="itemIndex" wx:key="itemIndex" wx:for-item="itemLi" class="_6e2c23b">
+      <block wx:if="{{mapType == 'job'}}" class="_6e2c23b">
+        
+  <view class="li status _3f47290 _6e2c23b" bindtap="$jobListItem$navigate" data-com-index="{{undefined}}" data-wpynavigate-a="{{itemLi}}">
+    <!-- 审核状态 -->
+    <view class="itemStatus itemStatus{{itemLi.auditStatus}} _3f47290"  wx:if="{{itemLi.auditStatus != 2}}">
+      <text class="_3f47290">{{$jobListItem$auditStatus[itemLi.auditStatus]}}</text>
+    </view>
+    <view class="itemStatus closeItem _3f47290"  wx:if="{{itemLi.status == 3}}">
+      <text class="_3f47290">已关闭</text>
+    </view>
+    <view class="head-li _3f47290">
+      <view class="title _3f47290">
+        <text class="h1 _3f47290">{{itemLi.title}}</text>
+        <block  wx:if="{{itemLi.legalizeType != '-1'}}" class="_3f47290">
+          <image class="real _3f47290" src="https://bbs.cehome.com/wxApp/jobResume/imgs/yishiming.svg"/>
+        </block>
+        <block wx:if="{{itemLi.sitePhotoFlag == 1}}" class="_3f47290">
+          <image class="workPic _3f47290" src="https://bbs.cehome.com/wxApp/jobResume/imgs/workPic.svg"/>
+        </block>
+      </view>
+      <text class="price _3f47290">{{itemLi.settlementAmountStr}}</text>
+    </view>
+    <view class="other _3f47290">
+      <view class="span _3f47290">
+        <!-- <text class="zoon icon">地</text> -->
+        <text class="text-zoon _3f47290">{{itemLi.area}}</text>
+      </view>
+      <!-- <block wx:if="{{item.orksRelationList.length > 0}}"> -->
+        <view class="span _3f47290" wx:if="{{itemLi.worksRelationList.length > 0}}">
+          <text class="type icon _3f47290"/>
+          <text wx:for="{{itemLi.worksRelationList}}" wx:for-item="labelItem" wx:key="index" class="text-type _3f47290">{{labelItem}}</text>
+        </view>
+      <!-- </block> -->
+    </view>
+    <view class="footer _3f47290">
+      <view class="left _3f47290">
+        <text wx:for="{{itemLi.moreWelfare}}" wx:key="index" wx:for-item="moreWelfareItem" class="_3f47290">{{moreWelfareItem}}</text>
+      </view>
+      <view class="timer _3f47290">{{itemLi.updateTimeStr}}</view>
+    </view>
+  </view>
+      </block>
+      <block  wx:if="{{mapType == 'resume'}}" class="_6e2c23b">
+        
+  <view class="li status _7da9090 _6e2c23b" bindtap="$resumeListItem$navigate" data-com-index="{{undefined}}" data-wpynavigate-a="{{itemLi}}">
+    <!-- 审核状态 -->
+    <view class="itemStatus itemStatus{{itemLi.auditStatus}} _7da9090"  wx:if="{{itemLi.auditStatus != 2}}">
+      <text class="_7da9090">{{$resumeListItem$auditStatus[itemLi.auditStatus]}}</text>
+    </view>
+    <view class="itemStatus closeItem _7da9090"  wx:if="{{itemLi.status == 3}}">
+      <text class="_7da9090">已关闭</text>
+    </view>
+    <view class="head-li _7da9090">
+      <view class="title _7da9090">
+        <text class="h1 _7da9090">{{itemLi.title}}</text>
+        <block  wx:if="{{itemLi.legalizeType != '-1'}}" class="_7da9090">
+          <image class="real _7da9090" src="https://bbs.cehome.com/wxApp/jobResume/imgs/yishiming.svg"/>
+        </block>
+        <block wx:if="{{itemLi.headPortraitFlag == 1}}" class="_7da9090">
+          <image class="gerenPic _7da9090" src="https://bbs.cehome.com/wxApp/jobResume/imgs/gerenPic.svg"/>
+        </block>
+        <block wx:if="{{itemLi.videoFlag == 2}}" class="_7da9090">
+          <image class="video _7da9090" src="https://bbs.cehome.com/wxApp/jobResume/imgs/video.svg"/>
+        </block>
+      </view>
+      <text class="price _7da9090">{{itemLi.settlementAmountStr}}</text>
+    </view>
+    <view class="other _7da9090">
+      <view class="span _7da9090">
+        <text class="text-zoon _7da9090">{{itemLi.area}}</text>
+      </view>
+      <view class="span _7da9090">
+        <text class="type icon _7da9090"/>
+        <text class="text-type _7da9090">{{itemLi.drivingYearsStr}}</text>
+      </view>
+    </view>
+    <view class="footer _7da9090">
+      <view class="left _7da9090">
+        <text wx:for="{{itemLi.worksRelationList}}" wx:for-item="worksItem" wx:key="index" class="_7da9090">{{worksItem}}</text>
+      </view>
+      <view class="timer _7da9090">{{itemLi.updateTimeStr}}</view>
+    </view>
+  </view>
+      </block>
+    </block>
+    <block  wx:if="{{!isData}}" class="_6e2c23b">
+      
+  <view class="nothing _8216152 _6e2c23b">
+    <image src="https://bbs.cehome.com/wxApp/v.2/nothing.png" class="_8216152"/>
+    <text class="_8216152">{{$nothing$isDataDesc}}~</text>
+  </view>
+    </block>
+    <text  wx:if="{{listData.length>0}}" class="loading _6e2c23b">{{loadingMsg}}</text>
+
+    </scroll-view>
+  </view>

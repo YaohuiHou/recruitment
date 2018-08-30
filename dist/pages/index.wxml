@@ -1,0 +1,68 @@
+
+  <view class="container">
+    <view class="mapHeader">
+    <view class="tarBars">
+      <view class="tabItem"  wx:for="{{tarBar}}" wx:key="{{index}}" data-index="{{index}}" data-type="{{item.type}}" bindtap="tabChange">
+        <view class="tabBtn {{item.selected ? 'active' : ''}}">{{item.name}}</view>
+      </view>
+      <text class="icon" bindtap="navigateAbout"/>
+    </view>
+    <view class="screen">
+      <view class="screen-content">
+        <view class="screen-item screen-item-active active" bindtap="gotoLink">
+          <text class="text">
+            <block>
+              <text>{{chooseCity.name}}</text>
+            </block>
+          </text>
+        </view>
+        <view  wx:for="{{screen}}" wx:for-index="itemIndex" wx:key="{{itemIndex}}" class="screen-item {{item.selected ? 'screen-item-active' : ''}} {{itemIndex != 0 ? 'active' : ''}}" data-index="{{itemIndex}}">
+          <block wx:if="{{itemIndex == 1}}">
+            <picker mode="multiSelector" bindchange="bindMultiPickerChange" bindcolumnchange="bindMultiPickerColumnChange" value="{{multiIndex}}" range="{{item.list}}">
+              <text class="text">
+                <block wx:if="{{item.selected}}">
+                  <text>{{item.list[1][multiIndex[1]]}}</text>
+                </block>
+                <block wx:if="{{!item.selected}}">
+                  <text>{{item.screenType}}</text>
+                </block>
+              </text>
+            </picker>
+          </block>
+          <block wx:if="{{itemIndex != 1}}">
+            <picker bindchange="bindPickerChange" bindcancel="cancal" data-index="{{itemIndex}}" value="{{item.screenItemIndex}}" range="{{item.list}}">
+              <text class="text">
+                <block wx:if="{{item.selected}}">
+                  <text>{{item.list[item.screenItemIndex]}}</text>
+                </block>
+                <block wx:if="{{!item.selected}}">
+                  <text>{{item.screenType}}</text>
+                </block>
+              </text>
+            </picker>
+          </block>
+        </view>
+      </view>
+    </view>
+    <view class="sreenLabel">
+      <scroll-view class="content" scroll-x="true">
+        <view class="labelContent">
+          <text wx:for="{{label}}" wx:key="{{index}}" data-index="{{index}}" class="item {{item.selected ? 'active' : ''}}" bindtap="selectedLabel">{{item.v}}</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+    <map id="map" scale="{{scale}}" markers="{{markers}}" latitude="{{latitude}}" bindcallouttap="bindcallouttap" longitude="{{longitude}}" controls="{{controls}}" show-location="{{true}}" style="width:100%; height:{{view.Height}}px">
+      <cover-view wx:if="{{isShowPoup}}" class="poup">
+        <cover-view class="poupContent">
+          <cover-view class="icon" bindtap="close"/>
+          <cover-view class="title">
+            <cover-view>提交实名认证，正价简历/职位可信度</cover-view>
+            <cover-view>让找工作/简历的人更放心</cover-view>
+          </cover-view>
+          <cover-view class="liAuth" bindtap="goAuth">立即认证</cover-view>
+          <cover-view class="awaitAuth" bindtap="close">稍后去我的-我的认证提交认证</cover-view>
+        </cover-view>
+      </cover-view>
+     </map>
+  </view>

@@ -1,0 +1,16 @@
+{
+  "description": "A WePY project",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false,
+    "newFeature": true
+  },
+  "compileType": "miniprogram",
+  "appid": "wx2a55e45d76a00cf0",
+  "projectname": "work_junting",
+  "miniprogramRoot": "./dist",
+  "libVersion": "2.2.2",
+  "condition": {}
+}

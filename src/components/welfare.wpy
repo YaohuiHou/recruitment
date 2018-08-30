@@ -1,0 +1,406 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span">薪资福利</text>
+    </view>
+    <view class="li">
+      <text class="title">薪资福利</text>
+      <text class="dian">:</text>
+      <view class="types">
+        <picker 
+          wx:for="{{welfare}}"
+          wx:key="{{index}}"
+          data-index="{{index}}"
+          @tap="selectFun('welfare',{{index}})"
+          bindchange="bindPickerChange"
+          disabled="{{!item.input}}"
+          range="{{item.list}}"
+          range-key="v"
+        >
+          <view class="option">
+            <view class="left">
+              <text class="icon">{{item.select ? '对' : '圈'}}</text>
+              <text class="text">{{item.name}}</text>
+            </view>
+            <view class="input" wx:if="{{item.input}}">
+              <view class="picker">
+                {{item.showValue}}
+              </view>
+              <text class="price">{{item.priceType}}</text>
+            </view>
+          </view>
+        </picker>
+      </view>
+    </view>
+    <block wx:if="{{pageType != 'resume'}}">
+      <view class="li no-fill">
+        <text class="title">更多福利</text>
+        <text class="dian">:</text>
+        <view class="types">
+          <view wx:for="{{more}}" @tap="selectMoreFun('more',{{index}})" class="em {{item.select ? 'selected' : ''}}" wx:key="{{index}}">
+            <text class="name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy'
+export default class Index extends wepy.component {
+  props = {
+    item: {},
+    pageType: {
+      twoWay: true
+    },
+    editorDataObject: {
+      twoWay: true
+    }
+  }
+
+  watch = {
+    editorDataObject() {
+      // 添加详情数据
+      this.newEditorData()
+    }
+  }
+
+  data = {
+    welfare: [
+      {
+        name: '按天结',
+        value: 1,
+        select: false,
+        input: true,
+        type: 'settlementType',
+        showValue: '',
+        priceType: '元／天',
+        list: [
+          {
+            k: 11,
+            v: '100以下'
+          },
+          {
+            k: 12,
+            v: '100-200'
+          },
+          {
+            k: 13,
+            v: '200-300'
+          },
+          {
+            k: 14,
+            v: '300-400'
+          },
+          {
+            k: 15,
+            v: '400-500'
+          },
+          {
+            k: 16,
+            v: '500-600'
+          },
+          {
+            k: 17,
+            v: '600-700'
+          },
+          {
+            k: 18,
+            v: '700-800'
+          },
+          {
+            k: 19,
+            v: '800-900'
+          },
+          {
+            k: 110,
+            v: '900-1000'
+          },
+          {
+            k: 111,
+            v: '1000以上'
+          }
+        ]
+      },
+      {
+        name: '按月结',
+        value: 2,
+        select: false,
+        input: true,
+        type: 'settlementType',
+        showValue: '',
+        priceType: '元／月',
+        list: [
+          {
+            k: 21,
+            v: '2000以下'
+          },
+          {
+            k: 22,
+            v: '2000-3000'
+          },
+          {
+            k: 23,
+            v: '3000-4000'
+          },
+          {
+            k: 24,
+            v: '4000-5000'
+          },
+          {
+            k: 25,
+            v: '5000-6000'
+          },
+          {
+            k: 26,
+            v: '6000-7000'
+          },
+          {
+            k: 27,
+            v: '7000-8000'
+          },
+          {
+            k: 28,
+            v: '8000-9000'
+          },
+          {
+            k: 29,
+            v: '9000-10000'
+          },
+          {
+            k: 210,
+            v: '10000以上'
+          }
+        ]
+      },
+      {
+        name: '薪资面议',
+        select: false,
+        input: false,
+        value: 3,
+        type: 'settlementType'
+      }
+    ],
+    more: [
+      {
+        name: '包吃',
+        select: false,
+        type: 'moreWelfare',
+        value: 1
+      },
+      {
+        name: '包住',
+        select: false,
+        type: 'moreWelfare',
+        value: 2
+      },
+      {
+        name: '话费补助',
+        select: false,
+        type: 'moreWelfare',
+        value: 3
+      },
+      {
+        name: '加班费',
+        select: false,
+        type: 'moreWelfare',
+        value: 4
+      },
+      {
+        name: '上保险',
+        select: false,
+        type: 'moreWelfare',
+        value: 5
+      },
+      {
+        name: '报销路费',
+        select: false,
+        type: 'moreWelfare',
+        value: 6
+      }
+    ]
+  }
+  onLoad() {}
+
+  methods = {
+    // 点击选中
+    selectFun(type, index) {
+      this[type].forEach((element, i) => {
+        element.select = false
+        if (i === index) {
+          element.select = true
+          if (!element.input) {
+            // 面议
+            this.$emit('editorData', element.type, element.value)
+          }
+        }
+      })
+    },
+    // 多选项
+    selectMoreFun(type, index) {
+      this[type][index].select = !this[type][index].select
+
+      let moreWelfareArr = []
+      this[type].forEach(element => {
+        element.select ? moreWelfareArr.push(element.value) : moreWelfareArr
+      })
+
+      this.$emit('editorData', 'moreWelfare', moreWelfareArr.join(','))
+    },
+    bindPickerChange(e) {
+      let valIndex = e.detail.value
+      let arrIndex = e.target.dataset.index
+
+      this.welfare[arrIndex].showValue = this.welfare[arrIndex].list[valIndex].v
+      this.$emit('editorData', 'settlementType', this.welfare[arrIndex].value)
+      this.$emit(
+        'editorData',
+        'settlementAmount',
+        this.welfare[arrIndex].list[valIndex].k
+      )
+    }
+  }
+
+  // 编辑数据
+  newEditorData() {
+    // 薪资福利
+    let welfareVal = this.editorDataObject.settlementType - 1
+    this.welfare[welfareVal].select = true
+    if (welfareVal != 2) {
+      this.welfare[
+        welfareVal
+      ].showValue = this.editorDataObject.settlementAmountStr
+      this.$emit(
+        'editorData',
+        'settlementAmount',
+        this.welfare[welfareVal].value
+      )
+    }
+    this.$emit(
+      'editorData',
+      'settlementType',
+      this.editorDataObject.settlementType
+    )
+
+    // 更多福利
+    if (this.editorDataObject.moreWelfare) {
+      let moreArr = this.editorDataObject.moreWelfare.split(',')
+      let moreValueArr = []
+      moreArr.forEach((element, i) => {
+        if (this.more[i].name == element) {
+          this.more[i].select = true
+          moreValueArr.push(this.more[i].value)
+        }
+      })
+      this.$emit('editorData', 'moreWelfare', moreValueArr.join(','))
+    }
+    this.$apply()
+  }
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  .li {
+    padding-bottom: 10rpx;
+    .title,
+    .dian {
+      height: 68rpx;
+      line-height: 68rpx;
+    }
+    .types {
+      display: flex;
+      flex-direction: column;
+      .option {
+        padding: 10rpx 0;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        .left {
+          width: 210rpx;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          .icon {
+            width: 32rpx;
+            height: 32rpx;
+            margin-right: 20rpx;
+            font-family: 'TieJia';
+            color: #3b6afb;
+            font-size: 32rpx;
+            line-height: 32rpx;
+            text-align: center;
+          }
+          .text {
+            font-size: 28rpx;
+            color: #4a4a53;
+          }
+        }
+        .input {
+          display: flex;
+          flex-direction: row;
+          font-size: 24rpx;
+          align-items: center;
+          color: #9ea4af;
+          .picker {
+            width: 240rpx;
+            height: 60rpx;
+            line-height: 60rpx;
+            border: 1rpx solid rgba(189, 193, 201, 0.7);
+            border-radius: 4rpx;
+            font-size: 28rpx;
+            color: #4a4a53;
+            margin-right: 12rpx;
+            font-weight: bold;
+            text-align: center;
+          }
+        }
+      }
+    }
+    &.no-fill {
+      padding-top: 20rpx;
+      padding-bottom: 10rpx;
+      .title:before {
+        display: none;
+      }
+      .types {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        flex-grow: 1;
+        .em {
+          margin-right: 12rpx;
+          margin-bottom: 20rpx;
+          border: 1rpx solid rgba(189, 193, 201, 0.7);
+          border-radius: 4rpx;
+          height: 68rpx;
+          display: flex;
+          align-items: center;
+          flex-direction: row;
+          width: calc(~'33% - 12rpx');
+          justify-content: center;
+          .name {
+            font-size: 24rpx;
+            color: #4a4a53;
+          }
+          &:nth-of-type(3n) {
+            margin-right: 0;
+          }
+          &.selected {
+            background: rgba(59, 106, 251, 0.08);
+            border-color: rgba(59, 106, 251, 0.7);
+            text {
+              color: #3b6afb;
+              font-weight: bold;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>

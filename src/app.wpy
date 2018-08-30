@@ -1,0 +1,221 @@
+<style lang="less">
+@font-face {
+  font-family: 'TieJia'; /* project id 775257 */
+  src: url('//at.alicdn.com/t/font_775257_6kf6xbcqbe2.eot');
+  src: url('//at.alicdn.com/t/font_775257_6kf6xbcqbe2.eot?#iefix')
+      format('embedded-opentype'),
+    url('//at.alicdn.com/t/font_775257_6kf6xbcqbe2.woff') format('woff'),
+    url('//at.alicdn.com/t/font_775257_6kf6xbcqbe2.ttf') format('truetype'),
+    url('//at.alicdn.com/t/font_775257_6kf6xbcqbe2.svg#iconfont') format('svg');
+}
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+import request from './common/request.js'
+import { setStore, connect } from 'wepy-redux'
+import configStore from './store'
+import { LOGIN_SUCCESS, GET_WXINFO_SUCCESS } from './store/types'
+// import { GET_WXINFO_SUCCESS } from './store/reducers'
+import sensorsDataFun from './common/sensorsdata'
+
+const store = configStore()
+setStore(store)
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/index',
+      'pages/resumeDetail',
+      'pages/postResume',
+      'pages/about',
+      'pages/postjob',
+      'pages/report',
+      'pages/jobDetail',
+      'pages/listPage',
+      'pages/realAuthentication',
+      'pages/release',
+      'pages/chooseCity',
+      'pages/projectType',
+      'pages/my-release',
+      'pages/verificationCode',
+      'pages/register',
+      'pages/personal'
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#fff',
+      navigationBarTitleText: 'WeChat',
+      navigationBarTextStyle: 'black'
+    },
+    tabBar: {
+      color: '#bdc1c9',
+      selectedColor: '#3b6afb',
+      borderStyle: 'white',
+      backgroundColor: '#fff',
+      list: [
+        {
+          selectedIconPath: 'images/homeed.png',
+          iconPath: 'images/home.png',
+          pagePath: 'pages/index',
+          text: '首页'
+        },
+        {
+          selectedIconPath: 'images/myed.png',
+          iconPath: 'images/my.png',
+          pagePath: 'pages/personal',
+          text: '我的'
+        },
+        {
+          selectedIconPath: 'images/replesed.png',
+          iconPath: 'images/reples.png',
+          pagePath: 'pages/release',
+          text: '发布'
+        }
+      ]
+    }
+  }
+  sensorsPublic = sensorsDataFun
+
+  globalData = {
+    userInfo: null
+  }
+
+  constructor() {
+    super()
+    this.use('requestfix')
+  }
+  methods = {
+    showToast(content, icon, time) {
+      wx.showToast({
+        title: content ? content : '',
+        icon: icon ? icon : 'none',
+        duration: time ? time : 2000
+      })
+    },
+    showLoading(title, icon, time) {
+      wx.showLoading({
+        title: title ? title : '',
+        icon: icon ? icon : '',
+        duration: time ? time : 30000,
+        mask: true
+      })
+    },
+    hideLoading() {
+      wx.hideLoading()
+    }
+  }
+  async onLaunch() {
+    sensorsDataFun.sensorsPublic()
+    this.getSystemInfo()
+
+    // 初始化小程序时初始化地区数据
+    wx.setStorage({
+      key: 'IndexChooseCity',
+      data: ''
+    })
+
+    await wx.checkSession({
+      success: res => {
+        try {
+          let wxInfo = wx.getStorageSync('wxInfo')
+          let loginInfo = wx.getStorageSync('loginInfo')
+          if (wxInfo) {
+            store.dispatch({
+              type: GET_WXINFO_SUCCESS,
+              payload: { wxInfo: wxInfo }
+            })
+          } else {
+            this.login()
+          }
+          if (loginInfo) {
+            store.dispatch({
+              type: LOGIN_SUCCESS,
+              payload: { userInfo: loginInfo }
+            })
+          }
+        } catch (error) {}
+      },
+      fail: () => {
+        // session_key 已经失效，需要重新执行登录流程
+        this.login() //重新登录
+      }
+    })
+  }
+  login = () => {
+    return new Promise((resolve, reject) => {
+      wx.login({
+        success: res => {
+          request
+            .cehomeRequest(
+              request.Api.getOpenid(),
+              { jsCode: res.code },
+              'GET',
+              this
+            )
+            .then(res => {
+              if (res.statusCode == 200) {
+                var wxInfo = res.data.data
+                store.dispatch({
+                  type: GET_WXINFO_SUCCESS,
+                  payload: { wxInfo: wxInfo }
+                })
+                try {
+                  wx.setStorageSync('wxInfo', wxInfo)
+                } catch (error) {}
+              } else {
+                this.methods.showToast('网络好像有问题，请检查网络~')
+              }
+            })
+            .catch(err => {
+              if (err.errMsg == 'request:fail timeout') {
+                this.methods.showToast('网络请求超时~')
+              } else {
+                this.methods.showToast('网络好像有问题，请检查网络~')
+              }
+            })
+        }
+      })
+    })
+  }
+
+  getUserInfo = () => {
+    var that = this
+    return new Promise(function(resolve, reject) {
+      wx.getUserInfo({
+        success: res => {
+          resolve('ok')
+        },
+        fail: err => {
+          reject('err')
+        }
+      })
+    })
+  }
+  // 验证用户是否属于本集团用户
+  checkUser = () => {
+    var that = this
+    return new Promise(function(resolve, reject) {})
+  }
+
+  getSystemInfo() {
+    wx.getSystemInfo({
+      success: function(res) {
+        var kScreenW = res.windowWidth / 375
+        var kScreenH = res.windowHeight / 603
+        wx.setStorageSync('kScreenW', kScreenW)
+        wx.setStorageSync('kScreenH', kScreenH)
+        wx.setStorageSync('ScreenH', res.windowHeight)
+      }
+    })
+  }
+}
+</script>

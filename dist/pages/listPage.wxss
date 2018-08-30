@@ -1,0 +1,4 @@
+@import "./../components/nothing.wxss";
+@import "./../components/resumeListItem.wxss";
+@import "./../components/jobListItem.wxss";
+.listPage._6e2c23b{height:100%}.listPage .content._6e2c23b{position:relative;height:100vh;background-color:#f3f3f3}.listPage .content .loading._6e2c23b{height:64rpx;display:block;line-height:64rpx;text-align:center;font-size:28rpx;color:#888;background:#f3f3f3}.listPage .content .li._6e2c23b{margin-top:20rpx}.nothing._6e2c23b{height:340rpx;display:block;margin:100rpx auto;display:flex;flex-direction:column;justify-content:center;text-align:center}.nothing image._6e2c23b{width:288rpx;height:288rpx;margin:0 auto}.nothing text._6e2c23b{margin-top:30rpx;color:#888;font-size:28rpx}

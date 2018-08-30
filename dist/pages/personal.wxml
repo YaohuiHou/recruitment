@@ -1,0 +1,58 @@
+
+  <view class="container _8b8a2a4">
+    <!-- <text>登录状态：login: {{state.login.login}} status:{{state.login.status}}</text>
+    <text>用户信息: {{state.login.userInfo}}</text> -->
+    <view class="header _8b8a2a4" bindtap="isLogin">
+      <image mode="aspectFit" src="{{userImg}}" class="_8b8a2a4"/>
+      <text class="name _8b8a2a4">{{userName}}</text>
+    </view>
+    <view class="ul _8b8a2a4">
+      <view class="li _8b8a2a4" data-navigetPage="my-release" data-id="1" bindtap="navigetor">
+        <view class="left _8b8a2a4">
+          <text class="icon icon1 _8b8a2a4">夹</text>
+          <text class="name _8b8a2a4">我的发布</text>
+          <view class="other _8b8a2a4">
+            <text class="_8b8a2a4">{{info.publishHdCount}} 职位</text>
+            <text class="_8b8a2a4">{{info.publishResumeCount}} 简历</text>
+          </view>
+        </view>
+        <view class="right _8b8a2a4"/>
+      </view>
+      <view class="li _8b8a2a4" data-navigetPage="my-release" data-id="2" bindtap="navigetor">
+        <view class="left _8b8a2a4">
+          <text class="icon icon2 _8b8a2a4">星</text>
+          <text class="name _8b8a2a4">我的收藏</text>
+          <view class="other _8b8a2a4">
+            <text class="_8b8a2a4">{{info.collectHdCount}} 职位</text>
+            <text class="_8b8a2a4">{{info.collectResumeCount}} 简历</text>
+          </view>
+        </view>
+        <view class="right _8b8a2a4"/>
+      </view>
+      <view class="li _8b8a2a4" data-navigetPage="realAuthentication" bindtap="navigetor">
+        <view class="left _8b8a2a4">
+          <text class="icon icon3 _8b8a2a4">盾</text>
+          <text class="name _8b8a2a4">我的认证</text>
+          <view class="other _8b8a2a4">
+            <text class="_8b8a2a4">{{types[info.legalizeType]}}</text>
+          </view>
+        </view>
+        <view class="right _8b8a2a4"/>
+      </view>
+    </view>
+    <block  wx:if="{{!isClose}}" class="_8b8a2a4">
+      
+  <view class="login-mode {{!$LoginMode$isClose ? '' : 'hidden'}} _facbad4 _8b8a2a4" bindtap="$LoginMode$isClose">
+    <view class="container _facbad4">
+      <text class="title _facbad4">登录或注册</text>
+      <button class="wxLogin _facbad4" type="primary" open-type="getUserInfo" bindgetuserinfo="$LoginMode$onGotUserInfo">
+        <text class="wx _facbad4">微信账号快速登录</text>
+      </button>
+      <button class="wxLogin _facbad4" bindtap="$LoginMode$goNavigator">
+        <text class="tel _facbad4">手机号注册/登录</text>
+      </button>
+      <!-- <text>{{text}}</text> -->
+    </view>
+  </view>
+    </block>
+  </view>

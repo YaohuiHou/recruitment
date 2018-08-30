@@ -1,0 +1,160 @@
+<template>
+  <view class="item">
+    <view class="header">
+      <text class="span leftLine">简历发布人</text>
+    </view>
+    <view class="li personMan">
+      <view class="left">
+        <view class="avatar">
+          <image src="{{personInfo.userAvatar}}"/>
+        </view>
+        <text class="nickName">{{personInfo.userName}}</text>
+        <text wx:if="{{personInfo.legalizeType == 1 || personInfo.legalizeType == 2}}" class="realStatus">已实名</text>
+      </view>
+      <view class="right" @tap="navigatePer()"><text>查看主页</text><text class="jiantou"></text></view>
+    </view>
+  </view>
+</template>
+
+
+<script>
+import wepy from 'wepy';
+export default class Index extends wepy.component {
+  props = {
+    personInfo: {
+      twoWay: true
+    }
+  };
+  data = {};
+  onLoad() {}
+
+  methods = {
+    navigatePer(userId, name) {
+      wx.setStorage({
+        key: 'otherUserInfo',
+        data: JSON.stringify(this.personInfo)
+      });
+      wx.navigateTo({
+        url: `my-release?page=detail`
+      });
+    }
+  };
+}
+</script>
+
+<style lang="less" scoped>
+.item {
+  // margin-bottom: 30rpx;
+  .money {
+    margin-left: 30rpx;
+  }
+  .li {
+    padding: 22rpx 0 0 0;
+    align-items: center;
+    .right {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      flex-grow: 1;
+      font-size: 28rpx;
+      color: #2d2d33;
+      letter-spacing: 0.25rpx;
+    }
+    .imageList {
+      display: flex;
+      flex-flow: wrap;
+      justify-content: flex-start;
+      :nth-child(2) {
+        margin: 0 18rpx 0 18rpx;
+      }
+      :nth-child(5) {
+        margin: 0 18rpx 0 18rpx;
+      }
+      image {
+        width: 218rpx;
+        height: 296rpx;
+        margin-bottom: 18rpx;
+      }
+    }
+    &.personMan {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      .left {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        .avatar {
+          width: 80rpx;
+          height: 80rpx;
+          border-radius: 50%;
+          image {
+            width: 80rpx;
+            height: 80rpx;
+            border-radius: 50%;
+            background-image: url('data:image/png;base64,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');
+            background-repeat: no-repeat;
+            background-size:100% 100%;
+            -moz-background-size:100% 100%;
+          }
+        }
+        .nickName {
+          font-size: 30rpx;
+          color: #2d2d33;
+          letter-spacing: 0.22rpx;
+          margin-left: 32rpx;
+          margin-right: 12rpx;
+        }
+        .realStatus {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          display: block;
+          padding: 0 10rpx;
+          // width: 80rpx;
+          height: 32rpx;
+          text-align: center;
+          background: rgba(255, 71, 87, 0.15);
+          border-radius: 4rpx;
+          font-size: 20rpx;
+          color: #ff4757;
+          letter-spacing: 0.18rpx;
+        }
+      }
+      .right {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        font-size: 24rpx;
+        color: #3b6afb;
+        letter-spacing: 0.21rpx;
+        text {
+          display: inline-block;
+          // position: relative;
+          // &::after {
+          // position: absolute;
+          // right: 0;
+          // top: 0;
+          // display: block;
+          // margin-left: 10rpx;
+          // transform: rotate(-90deg);
+          // content: '';
+          // font-family: 'TieJia';
+          // font-size: 18rpx;
+          // }
+          &.jiantou {
+            display: block;
+            transform: rotate(45deg);
+            border-top: 3rpx solid #3b6afb;
+            border-right: 3rpx solid #3b6afb;
+            width: 14rpx;
+            height: 14rpx;
+          }
+        }
+      }
+    }
+  }
+}
+</style>
